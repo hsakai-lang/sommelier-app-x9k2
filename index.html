@@ -28,6 +28,30 @@
 
       <p class="app-subtitle">ソムリエ・ワインエキスパート試験対策</p>
 
+        <div class="study-status">
+
+        <div class="study-today">
+          今日 <strong id="today-study-count">0</strong>
+          / <strong id="today-study-goal">10</strong>問
+        </div>
+
+        <div class="study-progress-track">
+          <div
+            id="today-study-progress"
+            class="study-progress-fill"
+            style="width: 0%">
+          </div>
+        </div>
+
+        <div class="study-streak">
+          🔥 <strong id="study-streak">0</strong>日連続達成
+          <span>
+            累計 <strong id="study-total-days">0</strong>日
+          </span>
+        </div>
+
+      </div>
+
     </header>
 
   
@@ -169,23 +193,40 @@
       </button>
 
 
-
-      <!-- 08番を白地図学習（別HTML）へ変更 -->
-
-      <button class="btn btn-card btn-card-special" onclick="location.href='map.html'">
-
+      <!-- 08 白地図学習 -->
+      <button class="btn btn-card btn-card-special" onclick="selectGenre('白地図学習')">
         <div class="card-header-row">
-
           <span class="card-num card-num-gold">08</span>
-
           <span class="main-text">白地図学習</span>
-
         </div>
+        <span class="sub-text text-gold">地方・河川・山脈・都市</span>
+        <div class="card-progress">
+          <div class="progress-fill progress-gold" id="prog-白地図学習" style="width: 0%"></div>
+        </div>
+      </button>
 
-        <span class="sub-text text-gold">産地・AOC位置トレーニング</span>
+      <!-- 09 仕分け -->
+      <button class="btn btn-card btn-card-special" onclick="location.href='sort.html'">
+        <div class="card-header-row">
+          <span class="card-num card-num-gold">09</span>
+          <span class="main-text">仕分け演習</span>
+        </div>
+        <span class="sub-text text-gold">格付け・分類</span>
+        <div class="card-progress">
+          <div class="progress-fill progress-gold" style="width: 0%"></div>
+        </div>
+      </button>
 
-        <div class="card-progress"><div class="progress-fill progress-gold" style="width: 100%"></div></div>
-
+      <!-- 10 並び替え -->
+      <button class="btn btn-card btn-card-special" onclick="location.href='order.html'">
+        <div class="card-header-row">
+          <span class="card-num card-num-gold">10</span>
+          <span class="main-text">並び替え演習</span>
+        </div>
+        <span class="sub-text text-gold">位置・順序</span>
+        <div class="card-progress">
+          <div class="progress-fill progress-gold" style="width: 0%"></div>
+        </div>
       </button>
 
     </div>
@@ -254,107 +295,145 @@
 
 
 
-  <div id="screen-quiz" class="container hidden">
+    <div id="screen-quiz" class="container hidden">
 
-    <div class="quiz-top-bar">
+      <div class="quiz-top-bar">
 
-      <span id="quiz-cat-label" class="badge">カテゴリ</span>
+        <span id="quiz-cat-label" class="badge">カテゴリ</span>
 
-      <span id="quiz-counter" class="counter">1 / 10</span>
-
-    </div>
-
-
-
-    <div class="quiz-progress-track">
-
-      <div id="quiz-progress-bar" class="quiz-progress-bar" style="width: 10%;"></div>
-
-    </div>
-
-
-
-    <div class="quiz-card">
-
-      <p id="quiz-question" class="q-text">問題文</p>
-
-      
-
-      <div id="quiz-img-container" class="img-container hidden">
-
-        <img id="quiz-img" src="" alt="問題画像">
+        <span id="quiz-counter" class="counter">1 / 10</span>
 
       </div>
 
 
 
-      <button id="btn-show-answer" class="btn btn-action btn-full btn-reveal" onclick="showAnswer()">答えを見る</button>
+      <div class="quiz-progress-track">
+
+        <div id="quiz-progress-bar" class="quiz-progress-bar" style="width: 10%;"></div>
+
+      </div>
 
 
 
-      <div id="quiz-answer-group" class="hidden answer-animate">
+      <div class="quiz-card">
 
-        <div class="a-box">
-
-          <span class="label">正解</span>
-
-          <p id="quiz-answer" class="a-text"></p>
-
-        </div>
+        <p id="quiz-question" class="q-text">問題文</p>
 
         
 
-        <div id="quiz-note-box" class="note-box hidden">
+        <div id="quiz-img-container" class="img-container hidden">
 
-          <span class="label">解説・ポイント</span>
+          <img id="quiz-img" src="" alt="問題画像">
 
-          <p id="quiz-note" class="note-text"></p>
+        </div>
 
+        <div id="map-choice-group" class="map-choice-group hidden"></div>
+
+        <div id="map-feedback" class="map-feedback hidden">
+          <div id="map-feedback-title" class="map-feedback-title"></div>
+          <div id="map-feedback-note" class="map-feedback-note"></div>
         </div>
 
 
 
-        <div class="eval-buttons">
+        <button id="btn-show-answer" class="btn btn-action btn-full btn-reveal" onclick="showAnswer()">答えを見る</button>
 
-          <button id="btn-status-weak" class="btn-eval btn-weak-eval" onclick="evaluateCurrentQuestion('weak')">✕ まだ</button>
 
-          <button id="btn-status-mastered" class="btn-eval btn-master-eval" onclick="evaluateCurrentQuestion('mastered')">◯ 覚えた</button>
+
+        <div id="quiz-answer-group" class="hidden answer-animate">
+
+          <div class="a-box">
+
+            <span class="label">正解</span>
+
+            <p id="quiz-answer" class="a-text"></p>
+
+          </div>
+
+          
+
+          <div id="quiz-note-box" class="note-box hidden">
+
+            <span class="label">解説・ポイント</span>
+
+            <p id="quiz-note" class="note-text"></p>
+
+          </div>
+
+
+
+          <div class="eval-buttons">
+
+            <button id="btn-status-weak" class="btn-eval btn-weak-eval" onclick="evaluateCurrentQuestion('weak')">✕ まだ</button>
+
+            <button id="btn-status-mastered" class="btn-eval btn-master-eval" onclick="evaluateCurrentQuestion('mastered')">◯ 覚えた</button>
+
+          </div>
 
         </div>
 
       </div>
-
-    </div>
 
 
 
     <div class="quiz-footer-grid">
-
       <button id="btn-fav-toggle" class="btn btn-glass btn-fav-small" onclick="toggleFavoriteCurrent()">お気に入り</button>
 
-      <button class="btn btn-action btn-main-next" onclick="nextQuestion()">次へ</button>
+      <button id="btn-next-question" class="btn btn-action btn-main-next" onclick="nextQuestion()">次へ</button>
+    </div>
+
+    <button class="btn btn-glass nav-top" onclick="showScreen('screen-home')">
+      メインに戻る
+    </button>
 
     </div>
 
-    <button class="btn btn-glass nav-top" onclick="showScreen('screen-home')">メインに戻る</button>
 
-  </div>
+    <div id="screen-map-result" class="container hidden">
+
+      <div class="quiz-top-bar">
+        <span class="badge">白地図・完成図</span>
+        <span id="map-result-score" class="counter"></span>
+      </div>
+
+      <div class="quiz-card">
+
+        <div id="map-result-img-container" class="img-container hidden">
+          <img id="map-result-img" src="" alt="白地図完成図">
+        </div>
+
+        <div id="map-result-list" class="map-result-list"></div>
+
+      </div>
+
+      <button class="btn btn-action btn-full" onclick="restartMapQuiz()">
+        同じ範囲をもう一度
+      </button>
+
+      <button class="btn btn-glass nav-top" onclick="showScreen('screen-home')">
+        メインに戻る
+      </button>
+
+    </div>
 
 
 
-  <div id="screen-search" class="container hidden">
+    <div id="screen-search" class="container hidden">
+  <h2>用語検索</h2>
 
-    <h2>用語検索</h2>
+  <input
+    type="text"
+    id="search-input"
+    placeholder="用語・地名・品種名で検索..."
+    oninput="filterDictionary()"
+  >
 
-    <input type="text" id="search-input" placeholder="用語・地名・品種名で検索..." oninput="filterDictionary()">
+  <div id="search-results" class="search-list"></div>
 
-    <div id="search-results" class="search-list"></div>
-
-    <button class="btn btn-glass nav-top" onclick="showScreen('screen-home')">メインに戻る</button>
-
-  </div>
-
-
+  <button class="btn btn-glass nav-top" onclick="showScreen('screen-home')">
+    メインに戻る
+  </button>
+</div>
 
   <div id="screen-settings" class="container hidden">
 
@@ -382,6 +461,24 @@
 
       </div>
 
+      <div class="setting-item">
+
+        <label>1日の学習目標</label>
+
+        <div>
+          <input
+            type="number"
+            id="setting-daily-goal"
+            min="1"
+            max="999"
+            step="1"
+            value="10"
+            onchange="StudyTracker.saveGoalFromInput()"
+          >
+          <span>問</span>
+        </div>
+
+      </div>
 
 
       <div class="setting-item">
@@ -449,7 +546,7 @@
   </div>
 
 
-
+  <script src="study-tracking.js"></script> 
   <script src="script.js"></script>
 
 </body>

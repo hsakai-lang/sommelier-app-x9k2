@@ -1,0 +1,808 @@
+<!DOCTYPE html>
+<html lang="ja">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+
+  <title>仕分け演習 | SOMMELIER MASTER</title>
+
+  <link rel="stylesheet" href="style.css">
+
+  <style>
+    .sort-header {
+      margin-bottom: 20px;
+    }
+
+    .sort-back {
+      display: inline-block;
+      margin-bottom: 14px;
+      color: var(--muted);
+      font-size: 12px;
+      font-weight: 700;
+      text-decoration: none;
+    }
+
+    .sort-title {
+      margin: 0;
+      color: var(--primary);
+      font-family: Georgia, "Times New Roman", "Yu Mincho", serif;
+      font-size: 21px;
+      font-weight: 700;
+      letter-spacing: .04em;
+    }
+
+    .sort-subtitle {
+      margin: 5px 0 0;
+      color: var(--muted);
+      font-size: 12px;
+    }
+
+    .sort-select-box {
+      margin-bottom: 16px;
+      padding: 14px;
+      border: 1px solid var(--line);
+      border-radius: var(--radius-card);
+      background: var(--surface);
+    }
+
+    .sort-select-box label {
+      display: block;
+      margin-bottom: 7px;
+      color: var(--muted);
+      font-size: 11px;
+      font-weight: 700;
+    }
+
+    .sort-select-box select {
+      width: 100%;
+      min-height: 44px;
+      padding: 8px 10px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: #fff;
+      color: var(--text);
+      font-size: 14px;
+      font-weight: 700;
+    }
+
+    .sort-guide {
+      margin: 0 0 14px;
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.6;
+    }
+
+    .sort-list {
+      display: grid;
+      gap: 9px;
+    }
+
+    .sort-row {
+      padding: 13px;
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      background: var(--surface);
+    }
+
+    .sort-row.correct {
+      border-color: #CFE2D6;
+      background: var(--success-soft);
+    }
+
+    .sort-row.wrong {
+      border-color: #EACDCD;
+      background: var(--danger-soft);
+    }
+
+    .sort-name {
+      margin-bottom: 10px;
+      color: var(--text);
+      font-size: 13px;
+      font-weight: 750;
+      line-height: 1.45;
+    }
+
+    .sort-options {
+      display: grid;
+      grid-template-columns: repeat(5, minmax(0, 1fr));
+      gap: 6px;
+    }
+
+    .sort-option {
+      min-width: 0;
+      min-height: 42px;
+      padding: 6px 3px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: var(--surface);
+      color: var(--muted);
+      font-size: 11px;
+      font-weight: 800;
+      cursor: pointer;
+    }
+
+    .sort-option.selected {
+      border-color: var(--memory);
+      background: var(--memory-soft);
+      color: var(--memory);
+    }
+
+    .sort-option:disabled {
+      cursor: default;
+    }
+
+    .sort-result-text {
+      margin-top: 9px;
+      font-size: 11px;
+      font-weight: 700;
+    }
+
+    .sort-row.correct .sort-result-text {
+      color: var(--success);
+    }
+
+    .sort-row.wrong .sort-result-text {
+      color: var(--danger);
+    }
+
+    .sort-actions {
+      display: grid;
+      grid-template-columns: 1.4fr .8fr;
+      gap: 9px;
+      margin-top: 18px;
+    }
+
+    .sort-summary {
+      margin-top: 24px;
+    }
+
+    .sort-score {
+      margin-bottom: 14px;
+      padding: 15px;
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      background: var(--surface);
+      text-align: center;
+    }
+
+    .sort-score-main {
+      display: block;
+      color: var(--text);
+      font-size: 21px;
+      font-weight: 800;
+    }
+
+    .sort-score-sub {
+      display: block;
+      margin-top: 2px;
+      color: var(--muted);
+      font-size: 11px;
+    }
+
+    .complete-title {
+      margin: 25px 0 10px;
+      color: var(--primary);
+      font-size: 16px;
+      font-weight: 800;
+    }
+
+    .complete-group {
+      margin-bottom: 10px;
+      overflow: hidden;
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      background: var(--surface);
+    }
+
+    .complete-group-title {
+      padding: 9px 12px;
+      border-bottom: 1px solid var(--line);
+      background: var(--surface-soft);
+      color: var(--primary);
+      font-size: 12px;
+      font-weight: 800;
+    }
+
+    .complete-item {
+      padding: 9px 12px;
+      border-bottom: 1px solid var(--line);
+      color: var(--text);
+      font-size: 12px;
+      font-weight: 600;
+      line-height: 1.5;
+    }
+
+    .complete-item:last-child {
+      border-bottom: 0;
+    }
+
+    @media (max-width: 360px) {
+      .sort-row {
+        padding: 11px;
+      }
+
+      .sort-option {
+        font-size: 10px;
+      }
+    }
+  </style>
+</head>
+
+<body>
+
+  <div class="container">
+
+    <div class="sort-header">
+      <a href="index.html" class="sort-back">← メインに戻る</a>
+
+      <h1 class="sort-title">仕分け演習</h1>
+
+      <p class="sort-subtitle">
+        格付け・分類をまとめて覚える
+      </p>
+    </div>
+
+
+    <div class="sort-select-box">
+      <label for="sort-set-select">問題セット</label>
+
+      <select id="sort-set-select"></select>
+    </div>
+
+
+    <p class="sort-guide">
+      各項目について、正しい分類を選択してください。
+    </p>
+
+
+    <div id="sort-list" class="sort-list"></div>
+
+
+    <div class="sort-actions">
+
+      <button
+        id="btn-check"
+        type="button"
+        class="btn btn-action">
+        答え合わせ
+      </button>
+
+      <button
+        id="btn-reset"
+        type="button"
+        class="btn btn-glass">
+        リセット
+      </button>
+
+    </div>
+
+
+    <div id="sort-summary" class="sort-summary hidden">
+
+      <div class="sort-score">
+        <span id="sort-score-main" class="sort-score-main"></span>
+        <span class="sort-score-sub">正解</span>
+      </div>
+
+      <div class="complete-title">
+        正しい仕分け一覧
+      </div>
+
+      <div id="complete-list"></div>
+
+    </div>
+
+  </div>
+
+<script src="study-tracking.js"></script>
+
+<script>
+
+  const GAS_API_URL =
+    "https://script.google.com/macros/s/AKfycbyJ3xJCkhakLUI_8mCsA6MPVrMXKTKuxIMSctkaJpnOmKFJ_ogq4hycm-3rtCcPMDBEKw/exec";
+
+
+  let sortSets = [];
+  let currentSet = null;
+  let answers = {};
+  let checked = false;
+
+
+  const setSelect =
+    document.getElementById("sort-set-select");
+
+  const sortList =
+    document.getElementById("sort-list");
+
+  const summary =
+    document.getElementById("sort-summary");
+
+  const scoreMain =
+    document.getElementById("sort-score-main");
+
+  const completeList =
+    document.getElementById("complete-list");
+
+
+  async function init() {
+
+    try {
+
+      setSelect.innerHTML =
+        '<option>読み込み中...</option>';
+
+      setSelect.disabled = true;
+
+
+      const response =
+        await fetch(`${GAS_API_URL}?t=${Date.now()}`, {
+          cache: "no-store"
+        });
+
+      if (!response.ok) {
+        throw new Error("データ取得失敗");
+      }
+
+
+      const allData =
+        await response.json();
+
+      const rows =
+        allData["仕分け問題"] || [];
+
+
+      if (rows.length === 0) {
+
+        setSelect.innerHTML =
+          '<option>問題が登録されていません</option>';
+
+        return;
+      }
+
+
+      createSortSets(rows);
+
+      renderSetSelect();
+
+
+      setSelect.disabled = false;
+
+
+      if (sortSets.length > 0) {
+        loadSet(sortSets[0].id);
+      }
+
+
+    } catch (error) {
+
+      console.error(error);
+
+      setSelect.innerHTML =
+        '<option>データ取得エラー</option>';
+
+      alert(
+        "仕分け問題の読み込みに失敗しました。"
+      );
+
+    }
+
+
+    setSelect.addEventListener(
+      "change",
+      () => loadSet(setSelect.value)
+    );
+
+
+    document.getElementById(
+      "btn-check"
+    ).addEventListener(
+      "click",
+      checkAnswers
+    );
+
+
+    document.getElementById(
+      "btn-reset"
+    ).addEventListener(
+      "click",
+      resetQuiz
+    );
+
+  }
+
+
+  function createSortSets(rows) {
+
+    const themeMap = {};
+
+
+    rows.forEach(row => {
+
+      const theme =
+        String(row.theme || "").trim();
+
+      const item =
+        String(row.item || "").trim();
+
+      const group =
+        String(row.group || "").trim();
+
+
+      if (
+        !theme ||
+        !item ||
+        !group
+      ) {
+        return;
+      }
+
+
+      if (!themeMap[theme]) {
+
+        themeMap[theme] = {
+          id: theme,
+          title: theme,
+          groups: [],
+          items: []
+        };
+
+      }
+
+
+      if (
+        !themeMap[theme].groups.includes(group)
+      ) {
+
+        themeMap[theme].groups.push(group);
+
+      }
+
+
+      themeMap[theme].items.push({
+        id: row.id,
+        name: item,
+        answer: group,
+        note: row.note || ""
+      });
+
+    });
+
+
+    sortSets =
+      Object.values(themeMap);
+
+  }
+
+
+  function renderSetSelect() {
+
+    setSelect.innerHTML = "";
+
+
+    sortSets.forEach(set => {
+
+      const option =
+        document.createElement("option");
+
+      option.value =
+        set.id;
+
+      option.textContent =
+        set.title;
+
+      setSelect.appendChild(option);
+
+    });
+
+  }
+
+
+  function loadSet(setId) {
+
+    currentSet =
+      sortSets.find(
+        set => set.id === setId
+      );
+
+
+    if (!currentSet) {
+      return;
+    }
+
+
+    answers = {};
+    checked = false;
+
+    summary.classList.add("hidden");
+
+    renderQuestions();
+
+  }
+
+
+  function renderQuestions() {
+
+    sortList.innerHTML = "";
+
+
+    currentSet.items.forEach(
+      (item, index) => {
+
+        const row =
+          document.createElement("div");
+
+        row.className =
+          "sort-row";
+
+
+        const selected =
+          answers[index];
+
+
+        if (checked) {
+
+          if (selected === item.answer) {
+            row.classList.add("correct");
+          } else {
+            row.classList.add("wrong");
+          }
+
+        }
+
+
+        const name =
+          document.createElement("div");
+
+        name.className =
+          "sort-name";
+
+        name.textContent =
+          item.name;
+
+        row.appendChild(name);
+
+
+        const options =
+          document.createElement("div");
+
+        options.className =
+          "sort-options";
+
+
+        currentSet.groups.forEach(
+          group => {
+
+            const button =
+              document.createElement("button");
+
+            button.type =
+              "button";
+
+            button.className =
+              "sort-option";
+
+            button.textContent =
+              group;
+
+
+            if (selected === group) {
+              button.classList.add("selected");
+            }
+
+
+            if (checked) {
+              button.disabled = true;
+            }
+
+
+            button.addEventListener(
+              "click",
+              () => {
+
+                if (checked) {
+                  return;
+                }
+
+                answers[index] =
+                  group;
+
+                renderQuestions();
+
+              }
+            );
+
+
+            options.appendChild(button);
+
+          }
+        );
+
+
+        row.appendChild(options);
+
+
+        if (checked) {
+
+          const result =
+            document.createElement("div");
+
+          result.className =
+            "sort-result-text";
+
+
+          if (selected === item.answer) {
+
+            result.textContent =
+              `○ 正解：${item.answer}`;
+
+          } else {
+
+            result.textContent =
+              `× ${selected || "未回答"} → 正解：${item.answer}`;
+
+          }
+
+
+          row.appendChild(result);
+
+        }
+
+
+        sortList.appendChild(row);
+
+      }
+    );
+
+  }
+
+
+function checkAnswers() {
+
+  if (
+    !currentSet ||
+    checked
+  ) {
+    return;
+  }
+
+
+  checked = true;
+
+
+  // 実際に回答した項目数を今日の学習数に加算
+  const answeredCount =
+    Object.keys(answers).length;
+
+  StudyTracker.record(
+    answeredCount
+  );
+
+
+  let correctCount = 0;
+
+
+  currentSet.items.forEach(
+    (item, index) => {
+
+      if (
+        answers[index] ===
+        item.answer
+      ) {
+        correctCount++;
+      }
+
+    }
+  );
+
+
+  renderQuestions();
+
+  renderCompleteList();
+
+
+  scoreMain.textContent =
+    `${correctCount} / ${currentSet.items.length}`;
+
+
+  summary.classList.remove(
+    "hidden"
+  );
+
+
+  summary.scrollIntoView({
+    behavior: "smooth",
+    block: "start"
+  });
+
+}
+
+  function renderCompleteList() {
+
+    completeList.innerHTML = "";
+
+
+    currentSet.groups.forEach(
+      groupName => {
+
+        const group =
+          document.createElement("div");
+
+        group.className =
+          "complete-group";
+
+
+        const title =
+          document.createElement("div");
+
+        title.className =
+          "complete-group-title";
+
+        title.textContent =
+          groupName;
+
+        group.appendChild(title);
+
+
+        const items =
+          currentSet.items.filter(
+            item =>
+              item.answer === groupName
+          );
+
+
+        items.forEach(item => {
+
+          const row =
+            document.createElement("div");
+
+          row.className =
+            "complete-item";
+
+          row.textContent =
+            item.name;
+
+          group.appendChild(row);
+
+        });
+
+
+        completeList.appendChild(group);
+
+      }
+    );
+
+  }
+
+
+  function resetQuiz() {
+
+    if (!currentSet) {
+      return;
+    }
+
+
+    answers = {};
+    checked = false;
+
+    summary.classList.add(
+      "hidden"
+    );
+
+    renderQuestions();
+
+    window.scrollTo({
+      top: 0,
+      behavior: "smooth"
+    });
+
+  }
+
+
+  init();
+
+</script>
+
+</body>
+
+</html>

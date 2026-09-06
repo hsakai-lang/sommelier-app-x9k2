@@ -1,0 +1,532 @@
+<!DOCTYPE html>
+<html lang="ja">
+
+<head>
+  <meta charset="UTF-8">
+  <meta
+    name="viewport"
+    content="width=device-width, initial-scale=1.0, viewport-fit=cover"
+  >
+
+  <title>MAP学習 | SOMMELIER MASTER</title>
+
+  <link rel="stylesheet" href="style.css">
+
+  <style>
+    .map-header {
+      margin-bottom: 20px;
+    }
+
+    .map-back {
+      display: inline-block;
+      margin-bottom: 14px;
+      color: var(--muted);
+      font-size: 12px;
+      font-weight: 700;
+      text-decoration: none;
+    }
+
+    .map-title {
+      margin: 0;
+      color: var(--primary);
+      font-family: Georgia, "Times New Roman", "Yu Mincho", serif;
+      font-size: 21px;
+      font-weight: 700;
+      letter-spacing: .04em;
+    }
+
+    .map-subtitle {
+      margin: 5px 0 0;
+      color: var(--muted);
+      font-size: 12px;
+    }
+
+    .map-select-box {
+      margin-bottom: 16px;
+      padding: 14px;
+      border: 1px solid var(--line);
+      border-radius: var(--radius-card);
+      background: var(--surface);
+    }
+
+    .map-select-box label {
+      display: block;
+      margin-bottom: 7px;
+      color: var(--muted);
+      font-size: 11px;
+      font-weight: 700;
+    }
+
+    .map-select-box select {
+      width: 100%;
+      min-height: 44px;
+      padding: 8px 10px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: #fff;
+      color: var(--text);
+      font-size: 14px;
+      font-weight: 700;
+    }
+
+    .map-card {
+      overflow: hidden;
+      border: 1px solid var(--line);
+      border-radius: var(--radius-card);
+      background: var(--surface);
+    }
+
+    .map-card-head {
+      padding: 14px 15px 12px;
+      border-bottom: 1px solid var(--line);
+    }
+
+    .map-name {
+      margin: 0;
+      color: var(--primary);
+      font-size: 17px;
+      font-weight: 800;
+      line-height: 1.5;
+    }
+
+    .map-region {
+      margin: 4px 0 0;
+      color: var(--muted);
+      font-size: 11px;
+      font-weight: 700;
+    }
+
+    .map-image-wrap {
+      padding: 10px;
+      background: #fff;
+      text-align: center;
+    }
+
+    .map-image-link {
+      display: block;
+      text-decoration: none;
+    }
+
+    .map-image {
+      display: block;
+      width: 100%;
+      height: auto;
+      max-height: 72vh;
+      object-fit: contain;
+      margin: 0 auto;
+      border-radius: 6px;
+    }
+
+    .map-image-hint {
+      margin: 8px 0 0;
+      color: var(--muted);
+      font-size: 10px;
+      line-height: 1.5;
+    }
+
+    .map-note {
+      display: none;
+      padding: 12px 15px;
+      border-top: 1px solid var(--line);
+      color: var(--text);
+      font-size: 12px;
+      line-height: 1.7;
+    }
+
+    .map-note.is-visible {
+      display: block;
+    }
+
+    .map-actions {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 9px;
+      margin-top: 14px;
+    }
+
+    .map-status {
+      margin-top: 9px;
+      color: var(--muted);
+      font-size: 10px;
+      font-weight: 700;
+      text-align: center;
+    }
+
+    .map-error {
+      padding: 18px 14px;
+      color: var(--danger);
+      font-size: 13px;
+      font-weight: 700;
+      line-height: 1.6;
+      text-align: center;
+    }
+
+    @media (max-width: 380px) {
+      .map-actions {
+        grid-template-columns: 1fr;
+      }
+
+      .map-image-wrap {
+        padding: 6px;
+      }
+    }
+  </style>
+</head>
+
+<body>
+
+  <div class="container">
+
+    <div class="map-header">
+
+      <a
+        href="index.html"
+        class="map-back">
+        ← メインに戻る
+      </a>
+
+      <h1 class="map-title">
+        MAP学習
+      </h1>
+
+      <p class="map-subtitle">
+        地図を見ながら主要産地を確認する
+      </p>
+
+    </div>
+
+
+    <div class="map-select-box">
+
+      <label for="map-select">
+        地図
+      </label>
+
+      <select id="map-select">
+        <option>読み込み中...</option>
+      </select>
+
+    </div>
+
+
+    <div
+      id="map-card"
+      class="map-card">
+
+      <div class="map-card-head">
+
+        <h2
+          id="map-name"
+          class="map-name">
+        </h2>
+
+        <p
+          id="map-region"
+          class="map-region">
+        </p>
+
+      </div>
+
+
+      <div class="map-image-wrap">
+
+        <a
+          id="map-image-link"
+          class="map-image-link"
+          href="#"
+          target="_blank"
+          rel="noopener">
+
+          <img
+            id="map-image"
+            class="map-image"
+            src=""
+            alt="">
+        </a>
+
+        <p class="map-image-hint">
+          画像をクリックすると画像だけで大きく表示できます。
+        </p>
+
+      </div>
+
+
+      <div
+        id="map-note"
+        class="map-note">
+      </div>
+
+    </div>
+
+
+    <div class="map-actions">
+
+      <button
+        id="btn-prev"
+        type="button"
+        class="btn btn-glass">
+        ← 前の地図
+      </button>
+
+      <button
+        id="btn-next"
+        type="button"
+        class="btn btn-action">
+        次の地図 →
+      </button>
+
+    </div>
+
+    <div
+      id="map-status"
+      class="map-status">
+    </div>
+
+  </div>
+
+
+  <script>
+
+    const GAS_API_URL =
+      "https://script.google.com/macros/s/AKfycbyJ3xJCkhakLUI_8mCsA6MPVrMXKTKuxIMSctkaJpnOmKFJ_ogq4hycm-3rtCcPMDBEKw/exec";
+
+
+    let maps = [];
+    let currentIndex = 0;
+
+
+    const mapSelect =
+      document.getElementById("map-select");
+
+    const mapCard =
+      document.getElementById("map-card");
+
+    const mapName =
+      document.getElementById("map-name");
+
+    const mapRegion =
+      document.getElementById("map-region");
+
+    const mapImage =
+      document.getElementById("map-image");
+
+    const mapImageLink =
+      document.getElementById("map-image-link");
+
+    const mapNote =
+      document.getElementById("map-note");
+
+    const mapStatus =
+      document.getElementById("map-status");
+
+    const prevButton =
+      document.getElementById("btn-prev");
+
+    const nextButton =
+      document.getElementById("btn-next");
+
+
+    async function init() {
+
+      try {
+
+        mapSelect.disabled = true;
+
+        const response =
+          await fetch(GAS_API_URL);
+
+        if (!response.ok) {
+          throw new Error("データ取得失敗");
+        }
+
+        const allData =
+          await response.json();
+
+        const rows =
+          allData["白地図学習"] || [];
+
+
+        maps = rows
+          .filter(row =>
+            String(row.subCat || "").trim() === "MAP"
+          )
+          .map(row => ({
+            id: String(row.id || "").trim(),
+            region: String(row.q || "").trim(),
+            title: String(row.a || "").trim(),
+            note: String(row.note || "").trim(),
+            img: String(row.img || "").trim()
+          }))
+          .filter(map =>
+            map.id &&
+            map.region &&
+            map.title &&
+            map.img
+          );
+
+
+        if (maps.length === 0) {
+
+          mapSelect.innerHTML =
+            "<option>MAPが登録されていません</option>";
+
+          mapCard.innerHTML =
+            '<div class="map-error">白地図学習シートに、サブカテゴリ「MAP」のデータがありません。</div>';
+
+          prevButton.disabled = true;
+          nextButton.disabled = true;
+
+          return;
+        }
+
+
+        renderSelect();
+
+        mapSelect.disabled = false;
+
+        loadMap(0);
+
+
+      } catch (error) {
+
+        console.error(error);
+
+        mapSelect.innerHTML =
+          "<option>データ取得エラー</option>";
+
+        mapCard.innerHTML =
+          '<div class="map-error">MAPデータの読み込みに失敗しました。</div>';
+
+        prevButton.disabled = true;
+        nextButton.disabled = true;
+
+      }
+
+
+      mapSelect.addEventListener(
+        "change",
+        () => {
+          const index =
+            maps.findIndex(
+              map => map.id === mapSelect.value
+            );
+
+          if (index >= 0) {
+            loadMap(index);
+          }
+        }
+      );
+
+
+      prevButton.addEventListener(
+        "click",
+        () => {
+          if (currentIndex <= 0) return;
+          loadMap(currentIndex - 1);
+        }
+      );
+
+
+      nextButton.addEventListener(
+        "click",
+        () => {
+          if (currentIndex >= maps.length - 1) return;
+          loadMap(currentIndex + 1);
+        }
+      );
+
+    }
+
+
+    function renderSelect() {
+
+      mapSelect.innerHTML = "";
+
+      maps.forEach(map => {
+
+        const option =
+          document.createElement("option");
+
+        option.value =
+          map.id;
+
+        option.textContent =
+          map.region;
+
+        mapSelect.appendChild(option);
+
+      });
+
+    }
+
+
+    function loadMap(index) {
+
+      currentIndex = index;
+
+      const map =
+        maps[currentIndex];
+
+      if (!map) return;
+
+
+      mapSelect.value =
+        map.id;
+
+      mapName.textContent =
+        map.title;
+
+      mapRegion.textContent =
+        map.region;
+
+
+      mapImage.src =
+        map.img;
+
+      mapImage.alt =
+        map.title;
+
+      mapImageLink.href =
+        map.img;
+
+
+      if (map.note) {
+
+        mapNote.textContent =
+          map.note;
+
+        mapNote.classList.add(
+          "is-visible"
+        );
+
+      } else {
+
+        mapNote.textContent = "";
+
+        mapNote.classList.remove(
+          "is-visible"
+        );
+
+      }
+
+
+      prevButton.disabled =
+        currentIndex === 0;
+
+      nextButton.disabled =
+        currentIndex === maps.length - 1;
+
+
+      mapStatus.textContent =
+        `${currentIndex + 1} / ${maps.length}`;
+
+    }
+
+
+    init();
+
+  </script>
+
+</body>
+
+</html>
