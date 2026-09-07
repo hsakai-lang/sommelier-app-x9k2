@@ -16,8 +16,6 @@
 
 <body>
 
-
-
   <div id="screen-home" class="container">
 
     <header class="app-header">
@@ -54,11 +52,19 @@
 
     </header>
 
-  
+
+    <!-- メイン機能：本日のAI復習ヒーローカード -->
+    <div class="main-ai-card">
+      <h2 class="ai-card-title">🍷 本日のAI学習</h2>
+      
+      <button id="btn-srs-main" class="btn btn-action btn-full btn-srs-hero" onclick="startSpecialQuiz('srs')">
+        学習を開始する (<span id="srs-due-count">0</span>問)
+      </button>
+    </div>
 
 
 
-<div class="section-header">
+  <div class="section-header">
 
       <span class="section-title">カテゴリー＆総合演習</span>
 
@@ -68,130 +74,82 @@
 
     <div class="menu-grid">
 
+      <!-- 01 ワイン総論 -->
       <button class="btn btn-card" onclick="selectGenre('ワイン総論')">
-
         <div class="card-header-row">
-
           <span class="card-num">01</span>
-
           <span class="main-text">ワイン総論</span>
-
         </div>
-
         <span class="sub-text">栽培・醸造・概論</span>
-
+        <span id="prog-text-ワイン総論" style="font-size: 10px; color: var(--muted); font-weight: 700; margin-top: auto; padding-top: 6px;">0/0問 (0%)</span>
         <div class="card-progress"><div class="progress-fill" id="prog-ワイン総論" style="width: 0%"></div></div>
-
       </button>
 
-
-
+      <!-- 02 国・地方別 -->
       <button class="btn btn-card" onclick="selectGenre('国・地方別')">
-
         <div class="card-header-row">
-
           <span class="card-num">02</span>
-
           <span class="main-text">国・地方別</span>
-
         </div>
-
         <span class="sub-text">地理・AOC・格付</span>
-
+        <span id="prog-text-国・地方別" style="font-size: 10px; color: var(--muted); font-weight: 700; margin-top: auto; padding-top: 6px;">0/0問 (0%)</span>
         <div class="card-progress"><div class="progress-fill" id="prog-国・地方別" style="width: 0%"></div></div>
-
       </button>
 
-
-
+      <!-- 03 ブドウ品種 -->
       <button class="btn btn-card" onclick="selectGenre('ブドウ品種')">
-
         <div class="card-header-row">
-
           <span class="card-num">03</span>
-
           <span class="main-text">ブドウ品種</span>
-
         </div>
-
         <span class="sub-text">品種特性・シノニム</span>
-
+        <span id="prog-text-ブドウ品種" style="font-size: 10px; color: var(--muted); font-weight: 700; margin-top: auto; padding-top: 6px;">0/0問 (0%)</span>
         <div class="card-progress"><div class="progress-fill" id="prog-ブドウ品種" style="width: 0%"></div></div>
-
       </button>
 
-
-
+      <!-- 04 ワインタイプ -->
       <button class="btn btn-card" onclick="selectGenre('ワインタイプ')">
-
         <div class="card-header-row">
-
           <span class="card-num">04</span>
-
           <span class="main-text">タイプ・規制</span>
-
         </div>
-
         <span class="sub-text">泡・甘口・強化ワイン</span>
-
+        <span id="prog-text-ワインタイプ" style="font-size: 10px; color: var(--muted); font-weight: 700; margin-top: auto; padding-top: 6px;">0/0問 (0%)</span>
         <div class="card-progress"><div class="progress-fill" id="prog-ワインタイプ" style="width: 0%"></div></div>
-
       </button>
 
-
-
+      <!-- 05 ペアリング -->
       <button class="btn btn-card" onclick="selectGenre('ペアリング')">
-
         <div class="card-header-row">
-
           <span class="card-num">05</span>
-
           <span class="main-text">ペアリング</span>
-
         </div>
-
         <span class="sub-text">サービス・料理・チーズ</span>
-
+        <span id="prog-text-ペアリング" style="font-size: 10px; color: var(--muted); font-weight: 700; margin-top: auto; padding-top: 6px;">0/0問 (0%)</span>
         <div class="card-progress"><div class="progress-fill" id="prog-ペアリング" style="width: 0%"></div></div>
-
       </button>
 
-
-
+      <!-- 06 その他酒類 -->
       <button class="btn btn-card" onclick="selectGenre('その他酒類')">
-
         <div class="card-header-row">
-
           <span class="card-num">06</span>
-
           <span class="main-text">その他酒類</span>
-
         </div>
-
         <span class="sub-text">ハードリカー・ビール</span>
-
+        <span id="prog-text-その他酒類" style="font-size: 10px; color: var(--muted); font-weight: 700; margin-top: auto; padding-top: 6px;">0/0問 (0%)</span>
         <div class="card-progress"><div class="progress-fill" id="prog-その他酒類" style="width: 0%"></div></div>
-
       </button>
 
-
-
+      <!-- 07 法律 -->
       <button class="btn btn-card" onclick="selectGenre('法律')">
-
         <div class="card-header-row">
-
           <span class="card-num">07</span>
-
           <span class="main-text">法律</span>
-
         </div>
-
         <span class="sub-text">酒税法・公衆衛生</span>
-
+        <span id="prog-text-法律" style="font-size: 10px; color: var(--muted); font-weight: 700; margin-top: auto; padding-top: 6px;">0/0問 (0%)</span>
         <div class="card-progress"><div class="progress-fill" id="prog-法律" style="width: 0%"></div></div>
-
       </button>
-
 
       <!-- 08 白地図学習 -->
       <button class="btn btn-card btn-card-special" onclick="selectGenre('白地図学習')">
@@ -200,6 +158,7 @@
           <span class="main-text">白地図学習</span>
         </div>
         <span class="sub-text text-gold">地方・河川・山脈・都市</span>
+        <span id="prog-text-白地図学習" style="font-size: 10px; color: var(--muted); font-weight: 700; margin-top: auto; padding-top: 6px;">0/0問 (0%)</span>
         <div class="card-progress">
           <div class="progress-fill progress-gold" id="prog-白地図学習" style="width: 0%"></div>
         </div>
@@ -251,10 +210,8 @@
 
       </button>
 
-      <button class="btn btn-action btn-fav" onclick="startSpecialQuiz('favorite')">
-
-        <span>お気に入り復習</span>
-
+      <button class="btn btn-action btn-fav" onclick="showFavoriteListScreen()">
+        <span>⭐ お気に入り一覧</span>
       </button>
 
       <button class="btn btn-action btn-weak" onclick="startSpecialQuiz('weak')">
@@ -298,13 +255,12 @@
     <div id="screen-quiz" class="container hidden">
 
       <div class="quiz-top-bar">
-
         <span id="quiz-cat-label" class="badge">カテゴリ</span>
-
-        <span id="quiz-counter" class="counter">1 / 10</span>
-
+        <div style="display: flex; align-items: center; gap: 8px;">
+          <button id="btn-fav-toggle" class="btn btn-glass" style="min-height: 32px; padding: 4px 10px; font-size: 13px;" onclick="toggleFavoriteCurrent()">☆</button>
+          <span id="quiz-counter" class="counter">1 / 10</span>
+        </div>
       </div>
-
 
 
       <div class="quiz-progress-track">
@@ -375,10 +331,8 @@
       </div>
 
 
-
     <div class="quiz-footer-grid">
-      <button id="btn-fav-toggle" class="btn btn-glass btn-fav-small" onclick="toggleFavoriteCurrent()">お気に入り</button>
-
+      <button id="btn-prev-question" class="btn btn-glass" onclick="prevQuestion()">← 前へ</button>
       <button id="btn-next-question" class="btn btn-action btn-main-next" onclick="nextQuestion()">次へ</button>
     </div>
 
@@ -543,6 +497,21 @@
 
     <button class="btn btn-glass nav-top" onclick="showScreen('screen-home')">メインに戻る</button>
 
+  </div>
+
+
+  <!-- お気に入り一覧画面 -->
+  <div id="screen-favorite" class="container hidden"> 
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+      <h2>お気に入り一覧</h2>
+      <span id="favorite-list-count" class="counter">0件</span>
+    </div>
+
+    <div id="favorite-list" style="display: grid; gap: 12px;"></div>
+
+    <button class="btn btn-glass nav-top" onclick="showScreen('screen-home')">
+      メインに戻る
+    </button>
   </div>
 
 

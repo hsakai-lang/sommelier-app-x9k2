@@ -766,3 +766,103 @@ select:focus-visible {
   }
 
 }
+
+/* メインAI復習カード */
+.main-ai-card {
+  margin-bottom: 20px;
+  padding: 20px 16px;
+  border: 2px solid var(--primary);
+  border-radius: var(--radius-card);
+  background: var(--surface);
+  text-align: center;
+  box-shadow: 0 4px 12px rgba(75, 48, 56, 0.08);
+}
+
+.ai-card-subtitle {
+  font-size: 11px;
+  font-weight: 800;
+  color: var(--accent);
+  letter-spacing: 0.08em;
+  display: block;
+  margin-bottom: 4px;
+}
+
+.ai-card-title {
+  margin: 0 0 6px;
+  font-size: 20px;
+  color: var(--primary);
+}
+
+.ai-card-desc {
+  margin: 0 0 16px;
+  font-size: 12px;
+  color: var(--muted);
+}
+
+.btn-srs-hero {
+  min-height: 52px;
+  font-size: 16px;
+  font-weight: 700;
+  background: var(--primary);
+  color: #fff;
+  border: none;
+}
+
+.btn-srs-hero:disabled {
+  background: var(--surface-soft);
+  color: var(--muted);
+  border: 1px solid var(--border);
+  cursor: default;
+}
+
+/* SRSレベルバッジ */
+.srs-badge {
+  display: inline-block;
+  padding: 2px 7px;
+  border-radius: 6px;
+  font-size: 11px;
+  font-weight: 800;
+  background: var(--surface-soft);
+  color: var(--muted);
+  margin-left: 6px;
+}
+
+.srs-badge.lvl-1,
+.srs-badge.lvl-2,
+.srs-badge.lvl-3 {
+  background: var(--success-soft);
+  color: var(--success);
+}
+
+.srs-badge.lvl-4 {
+  background: var(--accent-soft);
+  color: #8B6A37;
+  border: 1px solid var(--accent);
+}
+
+
+
+.main-ai-card {
+  margin-bottom: 12px;
+  padding: 12px 14px;
+  border: 2px solid var(--primary);
+  border-radius: var(--radius-card);
+  background: var(--surface);
+  text-align: center;
+  box-shadow: 0 2px 8px rgba(75, 48, 56, 0.06);
+}
+
+.ai-card-title {
+  margin: 0 0 10px;
+  font-size: 17px;
+  color: var(--primary);
+}
+
+.btn-srs-hero {
+  min-height: 46px;
+  font-size: 15px;
+  font-weight: 700;
+  background: var(--primary);
+  color: #fff;
+  border: none;
+}
