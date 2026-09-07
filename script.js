@@ -690,13 +690,21 @@ function getLevelBadgeHTML(level = 0) {
   return `<span class="srs-badge lvl-0">未習得</span>`;
 }
 
-// === 本日のAI復習キュー生成（復習分 ＋ 新規最大10問） ===
+// 配列を偏りなくランダムにシャッフルする関数（Fisher-Yates）
+function shuffleArray(array) {
+  for (let i = array.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [array[i], array[j]] = [array[j], array[i]];
+  }
+  return array;
+}
+
+// === 本日のAI学習キュー生成（ランダム抽出版） ===
 function getDailySrsQueue() {
   const today = getTodayString();
   let dueList = [];
   let newList = [];
 
-  // 今日すでに新規着手した問題数をカウント
   const todayNewCount = Object.values(userData).filter(u => u.firstDate === today).length;
   const remainingNewLimit = Math.max(0, 20 - todayNewCount);
 
@@ -714,8 +722,12 @@ function getDailySrsQueue() {
       });
     });
 
-  // 残りの新規枠数だけ取得して結合
-  return [...dueList, ...newList.slice(0, remainingNewLimit)];
+  // 全カテゴリーの未回答問題からランダムに切り出す
+  shuffleArray(newList);
+  const pickedNewQuestions = newList.slice(0, remainingNewLimit);
+
+  // 復習問題と新規問題を合体させ、さらに全体をシャッフル
+  return shuffleArray([...dueList, ...pickedNewQuestions]);
 }
 
 // === メイン復習カードのUI更新 ===
