@@ -767,7 +767,9 @@ select:focus-visible {
 
 }
 
-/* メインAI復習カード */
+/* ===============================
+   メインAI復習・学習カード
+================================ */
 .main-ai-card {
   margin-bottom: 20px;
   padding: 20px 16px;
@@ -788,9 +790,10 @@ select:focus-visible {
 }
 
 .ai-card-title {
-  margin: 0 0 6px;
+  margin: 0 0 10px;
   font-size: 20px;
   color: var(--primary);
+  font-weight: 800;
 }
 
 .ai-card-desc {
@@ -811,7 +814,7 @@ select:focus-visible {
 .btn-srs-hero:disabled {
   background: var(--surface-soft);
   color: var(--muted);
-  border: 1px solid var(--border);
+  border: 1px solid var(--line);
   cursor: default;
 }
 
@@ -840,29 +843,249 @@ select:focus-visible {
   border: 1px solid var(--accent);
 }
 
-
-
-.main-ai-card {
-  margin-bottom: 12px;
-  padding: 12px 14px;
-  border: 2px solid var(--primary);
-  border-radius: var(--radius-card);
-  background: var(--surface);
-  text-align: center;
-  box-shadow: 0 2px 8px rgba(75, 48, 56, 0.06);
+/* ===============================
+   AI設定モーダル（ポップアップ）
+================================ */
+.modal-backdrop {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: rgba(37, 35, 31, 0.45);
+  backdrop-filter: blur(2px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
 }
 
-.ai-card-title {
-  margin: 0 0 10px;
-  font-size: 17px;
+.modal-card {
+  background: var(--surface);
+  width: 88%;
+  max-width: 340px;
+  padding: 24px 20px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-card);
+  box-shadow: 0 8px 30px rgba(37, 35, 31, 0.15);
+}
+
+.modal-title {
+  margin: 0 0 20px;
+  color: var(--primary);
+  font-size: 16px;
+  font-weight: 800;
+  text-align: center;
+}
+
+/* 項目を横並びにピシッと揃える */
+.modal-card .setting-item {
+  display: flex !important;
+  flex-direction: row !important;
+  justify-content: space-between;
+  align-items: center;
+  min-height: 48px;
+  padding: 8px 0;
+  border-bottom: 1px solid var(--surface-soft);
+}
+
+.modal-card .setting-item label {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--text);
+  margin: 0;
+}
+
+.modal-card .setting-item input {
+  width: 72px;
+  height: 40px;
+  padding: 4px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--bg);
+  color: var(--primary);
+  font-size: 16px;
+  font-weight: 800;
+  text-align: center;
+  outline: none;
+}
+
+.modal-card .setting-item input:focus {
+  border-color: var(--primary);
+  background: #fff;
+}
+
+/* ボタンを均等に2つ並べる */
+.modal-actions {
+  display: flex;
+  gap: 10px;
+  margin-top: 8px;
+}
+
+.modal-actions button {
+  flex: 1;
+  min-height: 46px;
+}
+
+
+
+/* ---------- 設定カード全体 ---------- */
+.setting-card {
+  margin-bottom: 14px;
+  padding: 0 16px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-card);
+  background: var(--surface);
+}
+
+.setting-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  min-height: 56px;
+  padding: 8px 0;
+  border-bottom: 1px solid var(--line);
+  font-size: 13px;
+  font-weight: 650;
+}
+
+.setting-item:last-child {
+  border-bottom: 0;
+}
+
+/* 右側に並ぶ全パーツ（select / 数値入力エリア / ボタン）の幅・高さを210px×38pxで完全統一 */
+.setting-item > select,
+.setting-item > div,
+.setting-item > button {
+  width: 210px;
+  height: 38px;
+  box-sizing: border-box;
+}
+
+/* ドロップダウン（select）のデザイン統一 */
+.setting-item select {
+  padding: 0 10px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: #fff;
+  color: var(--text);
+  font-size: 13px;
+  font-weight: 600;
+  outline: none;
+}
+
+/* 「1日の学習目標」エリアのデザイン統一 */
+.setting-item > div {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 6px;
+}
+
+.setting-item > div input[type="number"] {
+  width: 60px;
+  height: 34px;
+  padding: 0 4px;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  background: #fff;
+  color: var(--text);
+  font-size: 13px;
+  font-weight: 700;
+  text-align: center;
+  outline: none;
+}
+
+.setting-item > div span {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text);
+}
+
+/* 「条件を設定する」ボタンのデザインをselectと完全に合わせる */
+.setting-item > button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 0 10px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: #fff;
+  color: var(--text);
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.setting-item > button:hover {
+  background: var(--surface-soft);
+}
+
+/* === style.css の末尾（右端・四角ボタン版） === */
+
+/* タイトル行を両端揃えにして右端に配置 */
+.header-title-container {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+}
+
+/* 右端の四角い?ボタン */
+.btn-help {
+  width: 34px;
+  height: 34px;
+  border-radius: 8px; /* 角丸の四角 */
+  border: 1px solid var(--line);
+  background: var(--surface);
+  color: var(--primary);
+  font-weight: 800;
+  font-size: 16px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  line-height: 1;
+  flex-shrink: 0;
+}
+
+.btn-help:hover {
+  background: var(--surface-soft);
+  border-color: var(--primary);
+}
+
+/* ヘルプモーダルのレイアウト */
+.modal-help-card {
+  max-width: 480px;
+  max-height: 80vh;
+  overflow-y: auto;
+  text-align: left;
+}
+
+.help-section {
+  margin-bottom: 16px;
+}
+
+.help-section strong {
+  display: block;
+  margin-bottom: 4px;
   color: var(--primary);
 }
 
-.btn-srs-hero {
-  min-height: 46px;
-  font-size: 15px;
-  font-weight: 700;
-  background: var(--primary);
-  color: #fff;
-  border: none;
+.help-section p, .help-section ul {
+  font-size: 13px;
+  line-height: 1.6;
+  margin: 0;
+  color: var(--text);
+}
+
+.help-section ul {
+  padding-left: 18px;
+}
+
+.help-section ul ul {
+  margin-top: 4px;
+  padding-left: 14px;
+  color: var(--muted);
 }

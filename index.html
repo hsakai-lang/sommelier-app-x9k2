@@ -1,85 +1,56 @@
 <!DOCTYPE html>
-
 <html lang="ja">
-
 <head>
-
   <meta charset="UTF-8">
-
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-
   <title>ソムリエ暗記アプリ</title>
-
   <link rel="stylesheet" href="style.css">
-
 </head>
-
 <body>
 
+  <!-- ホーム画面 -->
   <div id="screen-home" class="container">
-
     <header class="app-header">
+          <span class="app-symbol" aria-hidden="true"></span>
+          <div class="header-title-container">
+            <h1>SOMMELIER MASTER</h1>
+            <button type="button" class="btn-help" onclick="openHelpModal()" title="使い方・仕様">?</button>
+          </div>
+          <p class="app-subtitle">ソムリエ・ワインエキスパート試験対策</p>
 
-      <span class="app-symbol" aria-hidden="true"></span>
-
-      <h1>SOMMELIER MASTER</h1>
-
-      <p class="app-subtitle">ソムリエ・ワインエキスパート試験対策</p>
-
-        <div class="study-status">
-
+      <div class="study-status">
         <div class="study-today">
           今日 <strong id="today-study-count">0</strong>
           / <strong id="today-study-goal">10</strong>問
         </div>
 
         <div class="study-progress-track">
-          <div
-            id="today-study-progress"
-            class="study-progress-fill"
-            style="width: 0%">
-          </div>
+          <div id="today-study-progress" class="study-progress-fill" style="width: 0%"></div>
         </div>
 
         <div class="study-streak">
           🔥 <strong id="study-streak">0</strong>日連続達成
-          <span>
-            累計 <strong id="study-total-days">0</strong>日
-          </span>
+          <span>累計 <strong id="study-total-days">0</strong>日</span>
         </div>
-
       </div>
-
     </header>
 
-
-    <!-- メイン機能：本日のAI復習ヒーローカード -->
+    <!-- メイン機能：本日のAI学習ヒーローカード -->
     <div class="main-ai-card">
       <h2 class="ai-card-title">🍷 本日のAI学習</h2>
-      
       <button id="btn-srs-main" class="btn btn-action btn-full btn-srs-hero" onclick="startSpecialQuiz('srs')">
         学習を開始する (<span id="srs-due-count">0</span>問)
       </button>
     </div>
 
-
-
-  <div class="section-header">
-
+    <div class="section-header">
       <span class="section-title">カテゴリー＆総合演習</span>
-
     </div>
 
-
-
     <div class="menu-grid">
-
       <!-- 01 ワイン総論 -->
       <button class="btn btn-card" onclick="selectGenre('ワイン総論')">
-        <div class="card-header-row">
-          <span class="card-num">01</span>
-          <span class="main-text">ワイン総論</span>
-        </div>
+        <div class="card-header-row"><span class="card-num">01</span><span class="main-text">ワイン総論</span></div>
         <span class="sub-text">栽培・醸造・概論</span>
         <span id="prog-text-ワイン総論" style="font-size: 10px; color: var(--muted); font-weight: 700; margin-top: auto; padding-top: 6px;">0/0問 (0%)</span>
         <div class="card-progress"><div class="progress-fill" id="prog-ワイン総論" style="width: 0%"></div></div>
@@ -87,10 +58,7 @@
 
       <!-- 02 国・地方別 -->
       <button class="btn btn-card" onclick="selectGenre('国・地方別')">
-        <div class="card-header-row">
-          <span class="card-num">02</span>
-          <span class="main-text">国・地方別</span>
-        </div>
+        <div class="card-header-row"><span class="card-num">02</span><span class="main-text">国・地方別</span></div>
         <span class="sub-text">地理・AOC・格付</span>
         <span id="prog-text-国・地方別" style="font-size: 10px; color: var(--muted); font-weight: 700; margin-top: auto; padding-top: 6px;">0/0問 (0%)</span>
         <div class="card-progress"><div class="progress-fill" id="prog-国・地方別" style="width: 0%"></div></div>
@@ -98,10 +66,7 @@
 
       <!-- 03 ブドウ品種 -->
       <button class="btn btn-card" onclick="selectGenre('ブドウ品種')">
-        <div class="card-header-row">
-          <span class="card-num">03</span>
-          <span class="main-text">ブドウ品種</span>
-        </div>
+        <div class="card-header-row"><span class="card-num">03</span><span class="main-text">ブドウ品種</span></div>
         <span class="sub-text">品種特性・シノニム</span>
         <span id="prog-text-ブドウ品種" style="font-size: 10px; color: var(--muted); font-weight: 700; margin-top: auto; padding-top: 6px;">0/0問 (0%)</span>
         <div class="card-progress"><div class="progress-fill" id="prog-ブドウ品種" style="width: 0%"></div></div>
@@ -109,10 +74,7 @@
 
       <!-- 04 ワインタイプ -->
       <button class="btn btn-card" onclick="selectGenre('ワインタイプ')">
-        <div class="card-header-row">
-          <span class="card-num">04</span>
-          <span class="main-text">タイプ・規制</span>
-        </div>
+        <div class="card-header-row"><span class="card-num">04</span><span class="main-text">タイプ・規制</span></div>
         <span class="sub-text">泡・甘口・強化ワイン</span>
         <span id="prog-text-ワインタイプ" style="font-size: 10px; color: var(--muted); font-weight: 700; margin-top: auto; padding-top: 6px;">0/0問 (0%)</span>
         <div class="card-progress"><div class="progress-fill" id="prog-ワインタイプ" style="width: 0%"></div></div>
@@ -120,10 +82,7 @@
 
       <!-- 05 ペアリング -->
       <button class="btn btn-card" onclick="selectGenre('ペアリング')">
-        <div class="card-header-row">
-          <span class="card-num">05</span>
-          <span class="main-text">ペアリング</span>
-        </div>
+        <div class="card-header-row"><span class="card-num">05</span><span class="main-text">ペアリング</span></div>
         <span class="sub-text">サービス・料理・チーズ</span>
         <span id="prog-text-ペアリング" style="font-size: 10px; color: var(--muted); font-weight: 700; margin-top: auto; padding-top: 6px;">0/0問 (0%)</span>
         <div class="card-progress"><div class="progress-fill" id="prog-ペアリング" style="width: 0%"></div></div>
@@ -131,10 +90,7 @@
 
       <!-- 06 その他酒類 -->
       <button class="btn btn-card" onclick="selectGenre('その他酒類')">
-        <div class="card-header-row">
-          <span class="card-num">06</span>
-          <span class="main-text">その他酒類</span>
-        </div>
+        <div class="card-header-row"><span class="card-num">06</span><span class="main-text">その他酒類</span></div>
         <span class="sub-text">ハードリカー・ビール</span>
         <span id="prog-text-その他酒類" style="font-size: 10px; color: var(--muted); font-weight: 700; margin-top: auto; padding-top: 6px;">0/0問 (0%)</span>
         <div class="card-progress"><div class="progress-fill" id="prog-その他酒類" style="width: 0%"></div></div>
@@ -142,10 +98,7 @@
 
       <!-- 07 法律 -->
       <button class="btn btn-card" onclick="selectGenre('法律')">
-        <div class="card-header-row">
-          <span class="card-num">07</span>
-          <span class="main-text">法律</span>
-        </div>
+        <div class="card-header-row"><span class="card-num">07</span><span class="main-text">法律</span></div>
         <span class="sub-text">酒税法・公衆衛生</span>
         <span id="prog-text-法律" style="font-size: 10px; color: var(--muted); font-weight: 700; margin-top: auto; padding-top: 6px;">0/0問 (0%)</span>
         <div class="card-progress"><div class="progress-fill" id="prog-法律" style="width: 0%"></div></div>
@@ -153,352 +106,169 @@
 
       <!-- 08 白地図学習 -->
       <button class="btn btn-card btn-card-special" onclick="selectGenre('白地図学習')">
-        <div class="card-header-row">
-          <span class="card-num card-num-gold">08</span>
-          <span class="main-text">白地図学習</span>
-        </div>
+        <div class="card-header-row"><span class="card-num card-num-gold">08</span><span class="main-text">白地図学習</span></div>
         <span class="sub-text text-gold">地方・河川・山脈・都市</span>
         <span id="prog-text-白地図学習" style="font-size: 10px; color: var(--muted); font-weight: 700; margin-top: auto; padding-top: 6px;">0/0問 (0%)</span>
-        <div class="card-progress">
-          <div class="progress-fill progress-gold" id="prog-白地図学習" style="width: 0%"></div>
-        </div>
+        <div class="card-progress"><div class="progress-fill progress-gold" id="prog-白地図学習" style="width: 0%"></div></div>
       </button>
 
       <!-- 09 仕分け -->
       <button class="btn btn-card btn-card-special" onclick="location.href='sort.html'">
-        <div class="card-header-row">
-          <span class="card-num card-num-gold">09</span>
-          <span class="main-text">仕分け演習</span>
-        </div>
+        <div class="card-header-row"><span class="card-num card-num-gold">09</span><span class="main-text">仕分け演習</span></div>
         <span class="sub-text text-gold">格付け・分類</span>
-        <div class="card-progress">
-          <div class="progress-fill progress-gold" style="width: 0%"></div>
-        </div>
+        <div class="card-progress"><div class="progress-fill progress-gold" style="width: 0%"></div></div>
       </button>
 
       <!-- 10 並び替え -->
       <button class="btn btn-card btn-card-special" onclick="location.href='order.html'">
-        <div class="card-header-row">
-          <span class="card-num card-num-gold">10</span>
-          <span class="main-text">並び替え演習</span>
-        </div>
+        <div class="card-header-row"><span class="card-num card-num-gold">10</span><span class="main-text">並び替え演習</span></div>
         <span class="sub-text text-gold">位置・順序</span>
-        <div class="card-progress">
-          <div class="progress-fill progress-gold" style="width: 0%"></div>
-        </div>
+        <div class="card-progress"><div class="progress-fill progress-gold" style="width: 0%"></div></div>
       </button>
-
     </div>
 
-    
-
-    <div class="section-header">
-
-      <span class="section-title">クイック演習＆復習</span>
-
-    </div>
-
-
-
-    <!-- 全問題ランダム、お気に入り、弱点の3本柱へ整理 -->
+    <div class="section-header"><span class="section-title">クイック演習＆復習</span></div>
 
     <div class="quick-grid">
-
-      <button class="btn btn-action btn-full" onclick="startSpecialQuiz('all')">
-
-        <span>全問題ランダム演習</span>
-
-      </button>
-
-      <button class="btn btn-action btn-fav" onclick="showFavoriteListScreen()">
-        <span>⭐ お気に入り一覧</span>
-      </button>
-
-      <button class="btn btn-action btn-weak" onclick="startSpecialQuiz('weak')">
-
-        <span>弱点（まだ）克服</span>
-
-      </button>
-
+      <button class="btn btn-action btn-full" onclick="startSpecialQuiz('all')"><span>全問題ランダム演習</span></button>
+      <button class="btn btn-action btn-fav" onclick="showFavoriteListScreen()"><span>⭐ お気に入り一覧</span></button>
+      <button class="btn btn-action btn-weak" onclick="startSpecialQuiz('weak')"><span>弱点（まだ）克服</span></button>
     </div>
-
-
 
     <div class="tool-grid">
-
       <button class="btn btn-glass" onclick="showScreen('screen-search')">用語検索辞書</button>
-
       <button class="btn btn-glass" onclick="showScreen('screen-settings')">設定・データ同期</button>
-
     </div>
-
   </div>
 
-
-
+  <!-- サブカテゴリ画面 -->
   <div id="screen-subcat" class="container hidden">
-
-    <div class="subcat-header">
-
-      <h2 id="subcat-title">サブカテゴリ選択</h2>
-
-    </div>
-
+    <div class="subcat-header"><h2 id="subcat-title">サブカテゴリ選択</h2></div>
     <div id="subcat-list" class="subcat-grid"></div>
-
     <button class="btn btn-glass nav-top" onclick="showScreen('screen-home')">メインに戻る</button>
-
   </div>
 
+  <!-- クイズ画面 -->
+  <div id="screen-quiz" class="container hidden">
+    <div class="quiz-top-bar">
+      <span id="quiz-cat-label" class="badge">カテゴリ</span>
+      <div style="display: flex; align-items: center; gap: 8px;">
+        <button id="btn-fav-toggle" class="btn btn-glass" style="min-height: 32px; padding: 4px 10px; font-size: 13px;" onclick="toggleFavoriteCurrent()">☆</button>
+        <span id="quiz-counter" class="counter">1 / 10</span>
+      </div>
+    </div>
 
+    <div class="quiz-progress-track">
+      <div id="quiz-progress-bar" class="quiz-progress-bar" style="width: 10%;"></div>
+    </div>
 
-    <div id="screen-quiz" class="container hidden">
-
-      <div class="quiz-top-bar">
-        <span id="quiz-cat-label" class="badge">カテゴリ</span>
-        <div style="display: flex; align-items: center; gap: 8px;">
-          <button id="btn-fav-toggle" class="btn btn-glass" style="min-height: 32px; padding: 4px 10px; font-size: 13px;" onclick="toggleFavoriteCurrent()">☆</button>
-          <span id="quiz-counter" class="counter">1 / 10</span>
-        </div>
+    <div class="quiz-card">
+      <p id="quiz-question" class="q-text">問題文</p>
+      <div id="quiz-img-container" class="img-container hidden"><img id="quiz-img" src="" alt="問題画像"></div>
+      <div id="map-choice-group" class="map-choice-group hidden"></div>
+      <div id="map-feedback" class="map-feedback hidden">
+        <div id="map-feedback-title" class="map-feedback-title"></div>
+        <div id="map-feedback-note" class="map-feedback-note"></div>
       </div>
 
+      <button id="btn-show-answer" class="btn btn-action btn-full btn-reveal" onclick="showAnswer()">答えを見る</button>
 
-      <div class="quiz-progress-track">
-
-        <div id="quiz-progress-bar" class="quiz-progress-bar" style="width: 10%;"></div>
-
+      <div id="quiz-answer-group" class="hidden answer-animate">
+        <div class="a-box"><span class="label">正解</span><p id="quiz-answer" class="a-text"></p></div>
+        <div id="quiz-note-box" class="note-box hidden"><span class="label">解説・ポイント</span><p id="quiz-note" class="note-text"></p></div>
+        <div class="eval-buttons">
+          <button id="btn-status-weak" class="btn-eval btn-weak-eval" onclick="evaluateCurrentQuestion('weak')">✕ まだ</button>
+          <button id="btn-status-mastered" class="btn-eval btn-master-eval" onclick="evaluateCurrentQuestion('mastered')">◯ 覚えた</button>
+        </div>
       </div>
-
-
-
-      <div class="quiz-card">
-
-        <p id="quiz-question" class="q-text">問題文</p>
-
-        
-
-        <div id="quiz-img-container" class="img-container hidden">
-
-          <img id="quiz-img" src="" alt="問題画像">
-
-        </div>
-
-        <div id="map-choice-group" class="map-choice-group hidden"></div>
-
-        <div id="map-feedback" class="map-feedback hidden">
-          <div id="map-feedback-title" class="map-feedback-title"></div>
-          <div id="map-feedback-note" class="map-feedback-note"></div>
-        </div>
-
-
-
-        <button id="btn-show-answer" class="btn btn-action btn-full btn-reveal" onclick="showAnswer()">答えを見る</button>
-
-
-
-        <div id="quiz-answer-group" class="hidden answer-animate">
-
-          <div class="a-box">
-
-            <span class="label">正解</span>
-
-            <p id="quiz-answer" class="a-text"></p>
-
-          </div>
-
-          
-
-          <div id="quiz-note-box" class="note-box hidden">
-
-            <span class="label">解説・ポイント</span>
-
-            <p id="quiz-note" class="note-text"></p>
-
-          </div>
-
-
-
-          <div class="eval-buttons">
-
-            <button id="btn-status-weak" class="btn-eval btn-weak-eval" onclick="evaluateCurrentQuestion('weak')">✕ まだ</button>
-
-            <button id="btn-status-mastered" class="btn-eval btn-master-eval" onclick="evaluateCurrentQuestion('mastered')">◯ 覚えた</button>
-
-          </div>
-
-        </div>
-
-      </div>
-
+    </div>
 
     <div class="quiz-footer-grid">
       <button id="btn-prev-question" class="btn btn-glass" onclick="prevQuestion()">← 前へ</button>
       <button id="btn-next-question" class="btn btn-action btn-main-next" onclick="nextQuestion()">次へ</button>
     </div>
+    <button class="btn btn-glass nav-top" onclick="showScreen('screen-home')">メインに戻る</button>
+  </div>
 
-    <button class="btn btn-glass nav-top" onclick="showScreen('screen-home')">
-      メインに戻る
-    </button>
-
+  <!-- 白地図結果画面 -->
+  <div id="screen-map-result" class="container hidden">
+    <div class="quiz-top-bar"><span class="badge">白地図・完成図</span><span id="map-result-score" class="counter"></span></div>
+    <div class="quiz-card">
+      <div id="map-result-img-container" class="img-container hidden"><img id="map-result-img" src="" alt="白地図完成図"></div>
+      <div id="map-result-list" class="map-result-list"></div>
     </div>
+    <button class="btn btn-action btn-full" onclick="restartMapQuiz()">同じ範囲をもう一度</button>
+    <button class="btn btn-glass nav-top" onclick="showScreen('screen-home')">メインに戻る</button>
+  </div>
 
+  <!-- 用語検索画面 -->
+  <div id="screen-search" class="container hidden">
+    <h2>用語検索</h2>
+    <input type="text" id="search-input" placeholder="用語・地名・品種名で検索..." oninput="filterDictionary()">
+    <div id="search-results" class="search-list"></div>
+    <button class="btn btn-glass nav-top" onclick="showScreen('screen-home')">メインに戻る</button>
+  </div>
 
-    <div id="screen-map-result" class="container hidden">
-
-      <div class="quiz-top-bar">
-        <span class="badge">白地図・完成図</span>
-        <span id="map-result-score" class="counter"></span>
-      </div>
-
-      <div class="quiz-card">
-
-        <div id="map-result-img-container" class="img-container hidden">
-          <img id="map-result-img" src="" alt="白地図完成図">
-        </div>
-
-        <div id="map-result-list" class="map-result-list"></div>
-
-      </div>
-
-      <button class="btn btn-action btn-full" onclick="restartMapQuiz()">
-        同じ範囲をもう一度
-      </button>
-
-      <button class="btn btn-glass nav-top" onclick="showScreen('screen-home')">
-        メインに戻る
-      </button>
-
-    </div>
-
-
-
-    <div id="screen-search" class="container hidden">
-  <h2>用語検索</h2>
-
-  <input
-    type="text"
-    id="search-input"
-    placeholder="用語・地名・品種名で検索..."
-    oninput="filterDictionary()"
-  >
-
-  <div id="search-results" class="search-list"></div>
-
-  <button class="btn btn-glass nav-top" onclick="showScreen('screen-home')">
-    メインに戻る
-  </button>
-</div>
-
+  <!-- 設定・データ管理画面 -->
   <div id="screen-settings" class="container hidden">
-
     <h2>設定・データ管理</h2>
 
-    
-
     <div class="setting-card">
-
       <div class="setting-item">
-
         <label>1回の出題数</label>
-
         <select id="setting-count">
-
           <option value="5">5問</option>
-
           <option value="10" selected>10問</option>
-
           <option value="20">20問</option>
-
           <option value="all">全問</option>
-
         </select>
-
       </div>
 
       <div class="setting-item">
-
         <label>1日の学習目標</label>
-
         <div>
-          <input
-            type="number"
-            id="setting-daily-goal"
-            min="1"
-            max="999"
-            step="1"
-            value="10"
-            onchange="StudyTracker.saveGoalFromInput()"
-          >
+          <input type="number" id="setting-daily-goal" min="1" max="999" step="1" value="10" onchange="StudyTracker.saveGoalFromInput()">
           <span>問</span>
         </div>
-
       </div>
 
-
       <div class="setting-item">
-
         <label>出題順序</label>
-
         <select id="setting-order">
-
           <option value="random" selected>ランダム</option>
-
           <option value="order">登録順</option>
-
         </select>
-
       </div>
-
-
 
       <div class="setting-item">
-
         <label>出題対象</label>
-
         <select id="setting-target">
-
           <option value="all" selected>全問題（習得済み含む）</option>
-
           <option value="unmastered">未習得（まだ）のみ</option>
-
         </select>
-
       </div>
 
-    </div>
-
-
+      <div class="setting-item">
+        <label>AI学習ルール</label>
+        <button onclick="openSrsModal()">⚙️ 条件を設定する</button>
+      </div>
+    </div> <!-- ★修正：ここで setting-card を正しく閉じる -->
 
     <button class="btn btn-action btn-sync btn-full" onclick="fetchDataFromGAS()">シートから最新データを同期</button>
 
-    
-
     <div class="status-box">
-
       <div class="stat-pill"><span id="stat-total">0</span><span>総問題数</span></div>
-
       <div class="stat-pill stat-green"><span id="stat-mastered">0</span><span>覚えた</span></div>
-
       <div class="stat-pill stat-red"><span id="stat-weak">0</span><span>弱点</span></div>
-
     </div>
-
-
 
     <div class="reset-grid">
-
       <button class="btn btn-danger" onclick="resetUserData('mastered')">「覚えた」をリセット</button>
-
       <button class="btn btn-danger" onclick="resetUserData('weak')">「弱点」をリセット</button>
-
     </div>
 
-    
-
     <button class="btn btn-glass nav-top" onclick="showScreen('screen-home')">メインに戻る</button>
-
   </div>
-
 
   <!-- お気に入り一覧画面 -->
   <div id="screen-favorite" class="container hidden"> 
@@ -506,18 +276,87 @@
       <h2>お気に入り一覧</h2>
       <span id="favorite-list-count" class="counter">0件</span>
     </div>
-
     <div id="favorite-list" style="display: grid; gap: 12px;"></div>
-
-    <button class="btn btn-glass nav-top" onclick="showScreen('screen-home')">
-      メインに戻る
-    </button>
+    <button class="btn btn-glass nav-top" onclick="showScreen('screen-home')">メインに戻る</button>
   </div>
 
+  <!-- AI出題条件設定モーダル -->
+  <div id="modal-srs" class="modal-backdrop hidden">
+    <div class="modal-card">
+      <h3 class="modal-title">🍷 AI出題条件の設定</h3>
+      
+      <div class="srs-modal-row">
+        <label for="setting-srs-new">標準新規出題数</label>
+        <input type="number" id="setting-srs-new" value="20" min="0" oninput="validateSrsInputs()">
+      </div>
+
+      <div class="srs-modal-row">
+        <label for="setting-srs-min-new">最低新規出題数</label>
+        <input type="number" id="setting-srs-min-new" value="10" min="0" oninput="validateSrsInputs()">
+      </div>
+
+      <div class="srs-modal-row">
+        <label for="setting-srs-max-total">合計最大出題数</label>
+        <input type="number" id="setting-srs-max-total" value="100" min="0">
+      </div>
+
+      <div class="srs-modal-actions">
+        <button type="button" class="btn btn-glass" onclick="closeSrsModal(false)">キャンセル</button>
+        <button type="button" class="btn btn-action" onclick="closeSrsModal(true)">保存する</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 使い方・仕様解説モーダル -->
+  <div id="modal-help" class="modal-backdrop hidden">
+    <div class="modal-card modal-help-card">
+      <h3 class="modal-title">📖 使い方・仕様ガイド</h3>
+      
+      <div class="help-content">
+        <section class="help-section">
+          <strong>1. データ同期</strong>
+          <p>初回起動時や問題データ更新時は、設定画面の「シートから最新データを同期」を押して最新データを取り込んでください。</p>
+        </section>
+
+        <section class="help-section">
+          <strong>2. AI出題（SRS）の復習タイミング</strong>
+          <p>回答後の「◯ 覚えた」「✕ まだ」の選択に応じて、次回出題までの日数が自動更新されます。</p>
+          <ul>
+            <li><strong>「✕ まだ」</strong>：レベル0にリセットされ、今日中に再出題されます。</li>
+            <li><strong>「◯ 覚えた」</strong>：正解するたびにレベルが上がり、復習間隔が伸びます。
+              <ul>
+                <li>レベル1（✓）：1日後</li>
+                <li>レベル2（✓✓）：3日後</li>
+                <li>レベル3（✓✓✓）：7日後</li>
+                <li>レベル4（👑 Grand Cru）：14日後</li>
+              </ul>
+            </li>
+          </ul>
+        </section>
+
+        <section class="help-section">
+          <strong>3. 各種設定の意味</strong>
+          <ul>
+            <li><strong>標準新規出題数</strong>：1日に出題される新しい問題の数。</li>
+            <li><strong>最低新規出題数</strong>：復習問題が大量に溜まった場合に、優先して確保される新しい問題の数（※）。</li>
+            <li><strong>合計最大出題数</strong>：1日に解く問題（復習＋新規）の合計上限。</li>
+          </ul>
+          <div style="margin-top: 10px; padding: 10px; background: rgba(255,255,255,0.05); border-radius: 6px; font-size: 13px; line-height: 1.5;">
+            <strong>※ 復習が大量に溜まった場合（合計最大出題数を超える日）の挙動</strong><br>
+            1. 復習が大量にあっても、まず「最低新規出題数」の枠だけは新しい問題用に優先確保されます。<br>
+            2. 残りの枠（合計最大 － 最低新規出題数）に、期日の古い順から復習問題がセットされます。<br>
+            3. 枠に入り切らなかった復習問題や残りの新問題は消えず、翌日以降に自動で繰り越されます。
+          </div>
+        </section>
+      </div>
+
+      <div class="srs-modal-actions">
+        <button type="button" class="btn btn-action" onclick="closeHelpModal()">閉じる</button>
+      </div>
+    </div>
+  </div>
 
   <script src="study-tracking.js"></script> 
   <script src="script.js"></script>
-
 </body>
-
 </html>

@@ -699,14 +699,18 @@ function shuffleArray(array) {
   return array;
 }
 
-// === 本日のAI学習キュー生成（ランダム抽出版） ===
+// === 本日のAI学習キュー生成（設定値反映版） ===
 function getDailySrsQueue() {
   const today = getTodayString();
   let dueList = [];
   let newList = [];
 
+  // localStorageから設定値を読み込み（設定がなければデフォルト値）
+  const srsNew = parseInt(localStorage.getItem("sommelier_srs_new"), 10) || 20;
+  const srsMaxTotal = parseInt(localStorage.getItem("sommelier_srs_max_total"), 10) || 100;
+
   const todayNewCount = Object.values(userData).filter(u => u.firstDate === today).length;
-  const remainingNewLimit = Math.max(0, 20 - todayNewCount);
+  const remainingNewLimit = Math.max(0, srsNew - todayNewCount);
 
   Object.entries(rawData)
     .filter(([sheetName]) => !["白地図学習", "仕分け問題", "並び替え問題"].includes(sheetName))
@@ -722,12 +726,19 @@ function getDailySrsQueue() {
       });
     });
 
-  // 全カテゴリーの未回答問題からランダムに切り出す
+  // 未回答問題から設定した新規上限数分をランダム抽出
   shuffleArray(newList);
   const pickedNewQuestions = newList.slice(0, remainingNewLimit);
 
-  // 復習問題と新規問題を合体させ、さらに全体をシャッフル
-  return shuffleArray([...dueList, ...pickedNewQuestions]);
+  // 復習＋新規を合体してシャッフル
+  let queue = shuffleArray([...dueList, ...pickedNewQuestions]);
+
+  // 設定された「合計最大出題数」で上限を切る
+  if (queue.length > srsMaxTotal) {
+    queue = queue.slice(0, srsMaxTotal);
+  }
+
+  return queue;
 }
 
 // === メイン復習カードのUI更新 ===
@@ -744,4 +755,66 @@ function updateSrsCardUI() {
     btn.disabled = false;
     btn.innerHTML = `学習を開始する (${queue.length}問)`;
   }
+}
+
+// === AI出題設定モーダルの制御（整理版） ===
+function loadSrsSettings() {
+  const elNew = document.getElementById("setting-srs-new");
+  const elMin = document.getElementById("setting-srs-min-new");
+  const elMax = document.getElementById("setting-srs-max-total");
+
+  if (elNew) elNew.value = localStorage.getItem("sommelier_srs_new") || 20;
+  if (elMin) elMin.value = localStorage.getItem("sommelier_srs_min_new") || 10;
+  if (elMax) elMax.value = localStorage.getItem("sommelier_srs_max_total") || 100;
+}
+
+function validateSrsInputs() {
+  const elNew = document.getElementById("setting-srs-new");
+  const elMin = document.getElementById("setting-srs-min-new");
+  if (!elNew || !elMin) return;
+
+  const valNew = parseInt(elNew.value, 10) || 0;
+  const valMin = parseInt(elMin.value, 10) || 0;
+
+  elMin.max = valNew;
+  if (valMin > valNew) {
+    elMin.value = valNew;
+  }
+}
+
+function openSrsModal() {
+  loadSrsSettings();
+  validateSrsInputs();
+  document.getElementById("modal-srs").classList.remove("hidden");
+}
+
+function closeSrsModal(shouldSave = false) {
+  if (shouldSave) {
+    saveSrsSettings();
+  }
+  document.getElementById("modal-srs").classList.add("hidden");
+}
+
+function saveSrsSettings() {
+  const elNew = document.getElementById("setting-srs-new");
+  const elMin = document.getElementById("setting-srs-min-new");
+  const elMax = document.getElementById("setting-srs-max-total");
+  if (!elNew || !elMin || !elMax) return;
+
+  validateSrsInputs();
+
+  localStorage.setItem("sommelier_srs_new", elNew.value);
+  localStorage.setItem("sommelier_srs_min_new", elMin.value);
+  localStorage.setItem("sommelier_srs_max_total", elMax.value);
+}
+
+// === ヘルプモーダルの制御 ===
+function openHelpModal() {
+  const el = document.getElementById("modal-help");
+  if (el) el.classList.remove("hidden");
+}
+
+function closeHelpModal() {
+  const el = document.getElementById("modal-help");
+  if (el) el.classList.add("hidden");
 }
