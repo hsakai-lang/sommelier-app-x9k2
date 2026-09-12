@@ -500,13 +500,11 @@
 
   </div>
 
-  <script src="study-tracking.js"></script>
+<script src="study-tracking.js"></script>
 
   <script>
-
     const GAS_API_URL =
       "https://script.google.com/macros/s/AKfycbyJ3xJCkhakLUI_8mCsA6MPVrMXKTKuxIMSctkaJpnOmKFJ_ogq4hycm-3rtCcPMDBEKw/exec";
-
 
     let orderSets = [];
     let currentSet = null;
@@ -514,67 +512,43 @@
     let checked = false;
     let draggedIndex = null;
 
-
-    const categorySelect =
-      document.getElementById("order-category-select");
-
-    const setSelect =
-      document.getElementById("order-set-select");
-
-    const questionElement =
-      document.getElementById("order-question");
-
-    const orderList =
-      document.getElementById("order-list");
-
-    const summary =
-      document.getElementById("order-summary");
-
-    const scoreMain =
-      document.getElementById("order-score-main");
-
-    const completeOrder =
-      document.getElementById("complete-order");
-
+    const categorySelect = document.getElementById("order-category-select");
+    const setSelect = document.getElementById("order-set-select");
+    const questionElement = document.getElementById("order-question");
+    const orderList = document.getElementById("order-list");
+    const summary = document.getElementById("order-summary");
+    const scoreMain = document.getElementById("order-score-main");
+    const completeOrder = document.getElementById("complete-order");
 
     async function init() {
-
       try {
-
         categorySelect.disabled = true;
-
-        setSelect.innerHTML =
-          "<option>読み込み中...</option>";
-
+        setSelect.innerHTML = "<option>読み込み中...</option>";
         setSelect.disabled = true;
 
-
-        const response =
-          await fetch(GAS_API_URL);
-
-        if (!response.ok) {
-          throw new Error("データ取得失敗");
+        let rows = [];
+        const cached = localStorage.getItem('sommelier_quiz_data');
+        
+        // 1. まずlocalStorage（キャッシュ）から読み込む
+        if (cached) {
+          const allData = JSON.parse(cached);
+          rows = allData["並び替え問題"] || [];
         }
 
-
-        const allData =
-          await response.json();
-
-        const rows =
-          allData["並び替え問題"] || [];
-
+        // 2. キャッシュがない場合のみGASへ通信
+        if (rows.length === 0) {
+          const response = await fetch(GAS_API_URL);
+          if (!response.ok) throw new Error("データ取得失敗");
+          const allData = await response.json();
+          rows = allData["並び替え問題"] || [];
+        }
 
         if (rows.length === 0) {
-
-          setSelect.innerHTML =
-            "<option>問題が登録されていません</option>";
-
+          setSelect.innerHTML = "<option>問題が登録されていません</option>";
           return;
         }
 
-
         createOrderSets(rows);
-
         renderCategorySelect();
         updateProblemSelect();
 
@@ -586,68 +560,19 @@
           loadSet(orderSets[0].id);
         }
 
-
       } catch (error) {
-
         console.error(error);
-
-        setSelect.innerHTML =
-          "<option>データ取得エラー</option>";
-
-        alert(
-          "並び替え問題の読み込みに失敗しました。"
-        );
-
+        setSelect.innerHTML = "<option>データ取得エラー</option>";
+        alert("並び替え問題の読み込みに失敗しました。");
       }
 
-
-      categorySelect.addEventListener(
-        "change",
-        updateProblemSelect
-      );
-
-
-      document.getElementById(
-        "btn-start-selected"
-      ).addEventListener(
-        "click",
-        startSelectedOrder
-      );
-
-
-      document.getElementById(
-        "btn-random-category"
-      ).addEventListener(
-        "click",
-        startRandomCategoryOrder
-      );
-
-
-      document.getElementById(
-        "btn-random-all"
-      ).addEventListener(
-        "click",
-        startRandomAllOrder
-      );
-
-
-      document.getElementById(
-        "btn-check"
-      ).addEventListener(
-        "click",
-        checkAnswers
-      );
-
-
-      document.getElementById(
-        "btn-reset"
-      ).addEventListener(
-        "click",
-        resetQuiz
-      );
-
+      categorySelect.addEventListener("change", updateProblemSelect);
+      document.getElementById("btn-start-selected").addEventListener("click", startSelectedOrder);
+      document.getElementById("btn-random-category").addEventListener("click", startRandomCategoryOrder);
+      document.getElementById("btn-random-all").addEventListener("click", startRandomAllOrder);
+      document.getElementById("btn-check").addEventListener("click", checkAnswers);
+      document.getElementById("btn-reset").addEventListener("click", resetQuiz);
     }
-
 
     // ===============================
     // スプレッドシート → 問題セット化
@@ -655,45 +580,21 @@
     // ===============================
 
     function createOrderSets(rows) {
-
       const setMap = {};
 
-
       rows.forEach(row => {
+        const id = String(row.id || "").trim();
+        const category = String(row.category || "").trim();
+        const theme = String(row.theme || "").trim();
+        const question = String(row.q || "").trim();
+        const item = String(row.item || "").trim();
+        const order = Number(row.order);
 
-        const id =
-          String(row.id || "").trim();
-
-        const category =
-          String(row.category || "").trim();
-
-        const theme =
-          String(row.theme || "").trim();
-
-        const question =
-          String(row.q || "").trim();
-
-        const item =
-          String(row.item || "").trim();
-
-        const order =
-          Number(row.order);
-
-
-        if (
-          !id ||
-          !category ||
-          !theme ||
-          !question ||
-          !item ||
-          !Number.isFinite(order)
-        ) {
+        if (!id || !category || !theme || !question || !item || !Number.isFinite(order)) {
           return;
         }
 
-
         if (!setMap[id]) {
-
           setMap[id] = {
             id: id,
             category: category,
@@ -701,649 +602,288 @@
             question: question,
             items: []
           };
-
         }
-
 
         setMap[id].items.push({
           name: item,
           order: order,
           note: row.note || ""
         });
-
       });
 
-
-      orderSets =
-        Object.values(setMap);
-
+      orderSets = Object.values(setMap);
     }
-
 
     function renderCategorySelect() {
+      const categories = [...new Set(orderSets.map(set => set.category).filter(Boolean))];
 
-      const categories =
-        [...new Set(
-          orderSets
-            .map(set => set.category)
-            .filter(Boolean)
-        )];
-
-
-      categorySelect.innerHTML =
-        '<option value="">すべてのカテゴリ</option>';
-
+      categorySelect.innerHTML = '<option value="">すべてのカテゴリ</option>';
 
       categories.forEach(category => {
-
-        const option =
-          document.createElement("option");
-
+        const option = document.createElement("option");
         option.value = category;
         option.textContent = category;
-
         categorySelect.appendChild(option);
-
       });
-
     }
 
-
     function updateProblemSelect() {
-
-      const category =
-        categorySelect.value;
-
+      const category = categorySelect.value;
       const filteredSets = category
-        ? orderSets.filter(
-            set => set.category === category
-          )
+        ? orderSets.filter(set => set.category === category)
         : orderSets;
-
 
       setSelect.innerHTML = "";
 
-
       filteredSets.forEach(set => {
-
-        const option =
-          document.createElement("option");
-
+        const option = document.createElement("option");
         option.value = set.id;
         option.textContent = set.title;
-
         setSelect.appendChild(option);
-
       });
 
-
-      setSelect.disabled =
-        filteredSets.length === 0;
-
+      setSelect.disabled = filteredSets.length === 0;
     }
-
 
     function startSelectedOrder() {
-
-      if (!setSelect.value) {
-        return;
-      }
-
+      if (!setSelect.value) return;
       loadSet(setSelect.value);
-
     }
-
 
     function startRandomCategoryOrder() {
-
-      const category =
-        categorySelect.value;
-
+      const category = categorySelect.value;
       const candidates = category
-        ? orderSets.filter(
-            set => set.category === category
-          )
+        ? orderSets.filter(set => set.category === category)
         : orderSets;
 
+      if (candidates.length === 0) return;
 
-      if (candidates.length === 0) {
-        return;
-      }
-
-
-      const set =
-        candidates[
-          Math.floor(
-            Math.random() * candidates.length
-          )
-        ];
-
-
+      const set = candidates[Math.floor(Math.random() * candidates.length)];
       setSelect.value = set.id;
       loadSet(set.id);
-
     }
-
 
     function startRandomAllOrder() {
+      if (orderSets.length === 0) return;
 
-      if (orderSets.length === 0) {
-        return;
-      }
-
-
-      const set =
-        orderSets[
-          Math.floor(
-            Math.random() * orderSets.length
-          )
-        ];
-
-
+      const set = orderSets[Math.floor(Math.random() * orderSets.length)];
       categorySelect.value = set.category;
       updateProblemSelect();
-
       setSelect.value = set.id;
       loadSet(set.id);
-
     }
-
 
     function loadSet(setId) {
-
-      currentSet =
-        orderSets.find(
-          set => set.id === setId
-        );
-
-
-      if (!currentSet) {
-        return;
-      }
-
+      currentSet = orderSets.find(set => set.id === setId);
+      if (!currentSet) return;
 
       checked = false;
-
       summary.classList.add("hidden");
-
-
-      questionElement.textContent =
-        currentSet.question;
-
-
-      currentItems =
-        shuffleArray(
-          currentSet.items
-        );
-
-
+      questionElement.textContent = currentSet.question;
+      currentItems = shuffleArray(currentSet.items);
       renderOrder();
-
     }
-
 
     function shuffleArray(array) {
-
-      const copied =
-        [...array];
-
-
-      for (
-        let i = copied.length - 1;
-        i > 0;
-        i--
-      ) {
-
-        const j =
-          Math.floor(
-            Math.random() * (i + 1)
-          );
-
-
-        [
-          copied[i],
-          copied[j]
-        ] = [
-          copied[j],
-          copied[i]
-        ];
-
+      const copied = [...array];
+      for (let i = copied.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [copied[i], copied[j]] = [copied[j], copied[i]];
       }
-
-
       return copied;
-
     }
-
 
     function renderOrder() {
-
       orderList.innerHTML = "";
+      const fragment = document.createDocumentFragment();
 
+      currentItems.forEach((item, index) => {
+        const row = document.createElement("div");
+        row.className = "order-item";
+        row.draggable = !checked;
+        row.dataset.index = index;
 
-      currentItems.forEach(
-        (item, index) => {
-
-          const row =
-            document.createElement("div");
-
-          row.className =
-            "order-item";
-
-          row.draggable =
-            !checked;
-
-          row.dataset.index =
-            index;
-
-
-          if (checked) {
-
-            if (
-              item.order === index + 1
-            ) {
-
-              row.classList.add(
-                "correct"
-              );
-
-            } else {
-
-              row.classList.add(
-                "wrong"
-              );
-
-            }
-
-          }
-
-
-          const number =
-            document.createElement("div");
-
-          number.className =
-            "order-position";
-
-          number.textContent =
-            index + 1;
-
-
-          const name =
-            document.createElement("div");
-
-          name.className =
-            "order-name";
-
-          name.textContent =
-            item.name;
-
-
-          const controls =
-            document.createElement("div");
-
-          controls.className =
-            "order-move-buttons";
-
-
-          const up =
-            document.createElement("button");
-
-          up.type = "button";
-          up.className = "order-move-btn";
-          up.textContent = "↑";
-
-          up.disabled =
-            checked ||
-            index === 0;
-
-          up.addEventListener(
-            "click",
-            () => moveItem(
-              index,
-              index - 1
-            )
-          );
-
-
-          const down =
-            document.createElement("button");
-
-          down.type = "button";
-          down.className = "order-move-btn";
-          down.textContent = "↓";
-
-          down.disabled =
-            checked ||
-            index === currentItems.length - 1;
-
-          down.addEventListener(
-            "click",
-            () => moveItem(
-              index,
-              index + 1
-            )
-          );
-
-
-          controls.appendChild(up);
-          controls.appendChild(down);
-
-          row.appendChild(number);
-          row.appendChild(name);
-          row.appendChild(controls);
-
-
-          if (checked) {
-
-            const result =
-              document.createElement("div");
-
-            result.className =
-              "order-result-text";
-
-
-            if (
-              item.order === index + 1
-            ) {
-
-              result.textContent =
-                "○ 正しい位置";
-
-            } else {
-
-              result.textContent =
-                `× 正解位置：${item.order}番`;
-
-            }
-
-
-            row.appendChild(result);
-
-          }
-
-
-          if (!checked) {
-
-            row.addEventListener(
-              "dragstart",
-              handleDragStart
-            );
-
-            row.addEventListener(
-              "dragover",
-              handleDragOver
-            );
-
-            row.addEventListener(
-              "drop",
-              handleDrop
-            );
-
-            row.addEventListener(
-              "dragend",
-              handleDragEnd
-            );
-
-          }
-
-
-          orderList.appendChild(row);
-
+        if (checked) {
+          row.classList.add(item.order === index + 1 ? "correct" : "wrong");
         }
-      );
 
-    }
-
-
-    function moveItem(
-      fromIndex,
-      toIndex
-    ) {
-
-      if (
-        checked ||
-        toIndex < 0 ||
-        toIndex >= currentItems.length
-      ) {
-        return;
-      }
-
-
-      const item =
-        currentItems.splice(
-          fromIndex,
-          1
-        )[0];
-
-
-      currentItems.splice(
-        toIndex,
-        0,
-        item
-      );
-
-
-      renderOrder();
-
-    }
-
-
-    function handleDragStart(event) {
-
-      draggedIndex =
-        Number(
-          event.currentTarget
-            .dataset.index
-        );
-
-
-      event.currentTarget
-        .classList.add(
-          "dragging"
-        );
-
-
-      event.dataTransfer
-        .effectAllowed =
-        "move";
-
-    }
-
-
-    function handleDragOver(event) {
-
-      event.preventDefault();
-
-      event.dataTransfer
-        .dropEffect =
-        "move";
-
-    }
-
-
-    function handleDrop(event) {
-
-      event.preventDefault();
-
-
-      const targetIndex =
-        Number(
-          event.currentTarget
-            .dataset.index
-        );
-
-
-      if (
-        draggedIndex === null ||
-        draggedIndex === targetIndex
-      ) {
-        return;
-      }
-
-
-      moveItem(
-        draggedIndex,
-        targetIndex
-      );
-
-
-      draggedIndex = null;
-
-    }
-
-
-    function handleDragEnd(event) {
-
-      event.currentTarget
-        .classList.remove(
-          "dragging"
-        );
-
-      draggedIndex = null;
-
-    }
-
-
-    function checkAnswers() {
-
-     if (
-        !currentSet ||
-        checked
-      ) {
-        return;
-      }
-
-      checked = true;
-      
-      // 並び替えの項目数を今日の学習数に加算
-      StudyTracker.record(
-        currentItems.length
-      );
-
-
-      let correctCount = 0;
-
-
-      currentItems.forEach(
-        (item, index) => {
-
-          if (
-            item.order === index + 1
-          ) {
-            correctCount++;
-          }
-
-        }
-      );
-
-
-      renderOrder();
-
-      renderCompleteOrder();
-
-
-      scoreMain.textContent =
-        `${correctCount} / ${currentItems.length}`;
-
-
-      summary.classList.remove(
-        "hidden"
-      );
-
-
-      summary.scrollIntoView({
-        behavior: "smooth",
-        block: "start"
-      });
-
-    }
-
-
-    function renderCompleteOrder() {
-
-      completeOrder.innerHTML = "";
-
-
-      const correctItems =
-        [...currentSet.items]
-          .sort(
-            (a, b) =>
-              a.order - b.order
-          );
-
-
-      correctItems.forEach(item => {
-
-        const row =
-          document.createElement("div");
-
-        row.className =
-          "complete-row";
-
-
-        const number =
-          document.createElement("div");
-
-        number.className =
-          "complete-number";
-
-        number.textContent =
-          item.order;
-
-
-        const name =
-          document.createElement("div");
-
-        name.className =
-          "complete-name";
-
-        name.textContent =
-          item.name;
-
+        const number = document.createElement("div");
+        number.className = "order-position";
+        number.textContent = index + 1;
+
+        const name = document.createElement("div");
+        name.className = "order-name";
+        name.textContent = item.name;
+
+        const controls = document.createElement("div");
+        controls.className = "order-move-buttons";
+
+        const up = document.createElement("button");
+        up.type = "button";
+        up.className = "order-move-btn";
+        up.textContent = "↑";
+        up.disabled = checked || index === 0;
+        up.addEventListener("click", () => moveItem(index, index - 1));
+
+        const down = document.createElement("button");
+        down.type = "button";
+        down.className = "order-move-btn";
+        down.textContent = "↓";
+        down.disabled = checked || index === currentItems.length - 1;
+        down.addEventListener("click", () => moveItem(index, index + 1));
+
+        controls.appendChild(up);
+        controls.appendChild(down);
 
         row.appendChild(number);
         row.appendChild(name);
+        row.appendChild(controls);
 
-        completeOrder.appendChild(row);
+        if (checked) {
+          const result = document.createElement("div");
+          result.className = "order-result-text";
+          result.textContent = item.order === index + 1 
+            ? "○ 正しい位置" 
+            : `× 正解位置：${item.order}番`;
+          row.appendChild(result);
+        }
 
+        if (!checked) {
+          row.addEventListener("dragstart", handleDragStart);
+          row.addEventListener("dragover", handleDragOver);
+          row.addEventListener("drop", handleDrop);
+          row.addEventListener("dragend", handleDragEnd);
+
+          // ▼ スマホ用タッチイベントの追加
+          row.addEventListener("touchstart", handleTouchStart, { passive: false });
+          row.addEventListener("touchmove", handleTouchMove, { passive: false });
+          row.addEventListener("touchend", handleTouchEnd);
+        }
+
+        fragment.appendChild(row);
       });
 
+      orderList.appendChild(fragment);
+    }
+
+    // ▼ スマホ用タッチ操作を処理する新設関数群
+    function handleTouchStart(event) {
+      if (checked || event.target.closest('.order-move-btn')) return;
+      draggedIndex = Number(event.currentTarget.dataset.index);
+      event.currentTarget.classList.add("dragging");
+      document.body.style.overflow = "hidden"; // 移動中の画面背景スクロールを防ぐ
+    }
+
+    function handleTouchMove(event) {
+      if (draggedIndex === null) return;
+      event.preventDefault(); // デフォルトのページスクロール動作を打ち消す
+    }
+
+    function handleTouchEnd(event) {
+      if (draggedIndex === null) return;
+      event.currentTarget.classList.remove("dragging");
+      document.body.style.overflow = ""; // スクロール固定を解除
+
+      const touch = event.changedTouches[0];
+      // 指を離した指先座標（X, Y）にある要素を特定
+      const elementFromPoint = document.elementFromPoint(touch.clientX, touch.clientY);
+      
+      if (elementFromPoint) {
+        const targetRow = elementFromPoint.closest(".order-item");
+        if (targetRow) {
+          const targetIndex = Number(targetRow.dataset.index);
+          if (draggedIndex !== targetIndex) {
+            moveItem(draggedIndex, targetIndex);
+          }
+        }
+      }
+      draggedIndex = null;
     }
 
 
-    function resetQuiz() {
+    function moveItem(fromIndex, toIndex) {
+      if (checked || toIndex < 0 || toIndex >= currentItems.length) return;
+      const item = currentItems.splice(fromIndex, 1)[0];
+      currentItems.splice(toIndex, 0, item);
+      renderOrder();
+    }
 
-      if (!currentSet) {
-        return;
-      }
+    function handleDragStart(event) {
+      draggedIndex = Number(event.currentTarget.dataset.index);
+      event.currentTarget.classList.add("dragging");
+      event.dataTransfer.effectAllowed = "move";
+    }
 
+    function handleDragOver(event) {
+      event.preventDefault();
+      event.dataTransfer.dropEffect = "move";
+    }
 
-      checked = false;
+    function handleDrop(event) {
+      event.preventDefault();
+      const targetIndex = Number(event.currentTarget.dataset.index);
+      if (draggedIndex === null || draggedIndex === targetIndex) return;
+      moveItem(draggedIndex, targetIndex);
+      draggedIndex = null;
+    }
 
-      summary.classList.add(
-        "hidden"
-      );
+    function handleDragEnd(event) {
+      event.currentTarget.classList.remove("dragging");
+      draggedIndex = null;
+    }
 
+    function checkAnswers() {
+      if (!currentSet || checked) return;
 
-      currentItems =
-        shuffleArray(
-          currentSet.items
-        );
+      checked = true;
+      StudyTracker.record(currentItems.length);
 
+      let correctCount = 0;
+      currentItems.forEach((item, index) => {
+        if (item.order === index + 1) {
+          correctCount++;
+        }
+      });
 
       renderOrder();
-
-
-      window.scrollTo({
-        top: 0,
-        behavior: "smooth"
-      });
-
+      renderCompleteOrder();
+      scoreMain.textContent = `${correctCount} / ${currentItems.length}`;
+      summary.classList.remove("hidden");
+      summary.scrollIntoView({ behavior: "smooth", block: "start" });
     }
 
+    function renderCompleteOrder() {
+      completeOrder.innerHTML = "";
+      const correctItems = [...currentSet.items].sort((a, b) => a.order - b.order);
+
+      correctItems.forEach(item => {
+        const row = document.createElement("div");
+        row.className = "complete-row";
+
+        const number = document.createElement("div");
+        number.className = "complete-number";
+        number.textContent = item.order;
+
+        const name = document.createElement("div");
+        name.className = "complete-name";
+        name.textContent = item.name;
+
+        row.appendChild(number);
+        row.appendChild(name);
+        completeOrder.appendChild(row);
+      });
+    }
+
+    function resetQuiz() {
+      if (!currentSet) return;
+      checked = false;
+      summary.classList.add("hidden");
+      currentItems = shuffleArray(currentSet.items);
+      renderOrder();
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    }
 
     init();
-
   </script>
 
 </body>

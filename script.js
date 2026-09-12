@@ -23,35 +23,29 @@ window.onload = () => {
   updateStats();
   updateHomeProgress();
   
-  // ★追加：初期画面（ホーム）の状態をブラウザの履歴にセットする
   history.replaceState({ screen: 'screen-home' }, "", "");
 };
 
 // === 画面遷移（History API対応） ===
 function showScreen(screenId, pushHistory = true) {
-  // すべての画面を非表示
   document.querySelectorAll('.container').forEach(el => el.classList.add('hidden'));
-  // 指定された画面を表示
   const targetScreen = document.getElementById(screenId);
   if (targetScreen) targetScreen.classList.remove('hidden');
   window.scrollTo(0, 0);
 
-  // ★追加：履歴をブラウザに積む
   if (pushHistory) {
     history.pushState({ screen: screenId }, "", "");
   }
 }
 
-// === ★新規追加：ブラウザの「戻る」「進む」「スワイプ」を検知 ===
 window.addEventListener('popstate', (event) => {
   if (event.state && event.state.screen) {
-    // 履歴に残っている画面IDへ遷移（履歴には追加しない）
     showScreen(event.state.screen, false);
   } else {
-    // 履歴が空になったらホーム画面に戻る
     showScreen('screen-home', false);
   }
 });
+
 // === データ読み込み ===
 function loadUserData() {
   userData = JSON.parse(localStorage.getItem('sommelier_user_data')) || {};
@@ -92,16 +86,36 @@ async function fetchDataFromGAS() {
     alert("script.js の GAS_API_URL を書き換えてください。");
     return;
   }
-  try {
-    const res = await fetch(GAS_API_URL);
-    rawData = await res.json();
-    localStorage.setItem('sommelier_quiz_data', JSON.stringify(rawData));
-    alert("最新データの同期が完了しました！");
-    updateStats();
-    updateHomeProgress();
-  } catch (err) {
-    console.error(err);
-    alert("データの取得に失敗しました。");
+
+  const maxRetries = 3;
+  let attempt = 0;
+  let success = false;
+
+  while (attempt < maxRetries && !success) {
+    attempt++;
+    try {
+      if (attempt > 1) {
+        console.log(`データ取得リトライ中... (${attempt}/${maxRetries})`);
+      }
+      const res = await fetch(GAS_API_URL);
+      if (!res.ok) {
+        throw new Error(`HTTP error! status: ${res.status}`);
+      }
+      rawData = await res.json();
+      localStorage.setItem('sommelier_quiz_data', JSON.stringify(rawData));
+      alert("最新データの同期が完了しました！");
+      updateStats();
+      updateHomeProgress();
+      success = true;
+    } catch (err) {
+      console.error(`データ取得失敗 (${attempt}/${maxRetries}回目):`, err);
+      if (attempt < maxRetries) {
+        // 次の試行まで1.5秒待機
+        await new Promise(resolve => setTimeout(resolve, 1500));
+      } else {
+        alert("データの取得に失敗しました。ネットワーク環境を確認の上、再度お試しください。");
+      }
+    }
   }
 }
 
@@ -122,13 +136,15 @@ function selectGenre(genreName) {
   currentGenre = targetTabName;
   const genreData = rawData[targetTabName] || [];
 
-  if (genreData.length === 0) {
+  // 白地図学習以外でデータが0件の場合のみアラートを出して中断する
+  if (genreData.length === 0 && targetTabName !== "白地図学習") {
     alert("このカテゴリには問題が登録されていません。設定画面からデータを同期してください。");
     return;
   }
 
-  const uniqueSubCats = [...new Set(genreData.map(d => d.subCat).filter(Boolean))];
-  const subCats = targetTabName === "白地図学習" ? uniqueSubCats : ["すべて", ...uniqueSubCats];
+  // 「MAP」を除外してサブカテゴリの一覧を抽出
+  const uniqueSubCats = [...new Set(genreData.map(d => d.subCat).filter(d => d && d !== "MAP"))];
+  const subCats = targetTabName === "白地図学習" ? ["MAPを見る", ...uniqueSubCats] : ["すべて", ...uniqueSubCats];
 
   const container = document.getElementById('subcat-list');
   container.innerHTML = "";
@@ -138,21 +154,20 @@ function selectGenre(genreName) {
     btn.className = "btn btn-glass";
 
     let subList = genreData;
-    if (sub !== "すべて") {
+    if (sub !== "すべて" && sub !== "MAPを見る") {
       subList = genreData.filter(d => d.subCat === sub);
     }
-    // Lv.1以上（1回以上正解）を進捗数としてカウント
     const masteredCount = subList.filter(q => (userData[q.id]?.level || 0) >= 1 || userData[q.id]?.status === 'mastered').length;
     const progressText = ` (${masteredCount}/${subList.length})`;
 
-    if (targetTabName === "白地図学習" && sub === "MAP") {
-      btn.innerText = "MAPを見る";
+    if (targetTabName === "白地図学習" && sub === "MAPを見る") {
+      btn.innerText = "🗺️ MAP一覧を見る";
     } else {
       btn.innerText = sub + progressText;
     }
 
     btn.onclick = () => {
-      if (targetTabName === "白地図学習" && sub === "MAP") {
+      if (targetTabName === "白地図学習" && sub === "MAPを見る") {
         location.href = "map.html";
         return;
       }
@@ -169,6 +184,12 @@ function selectGenre(genreName) {
 // === クイズ開始（ジャンル指定） ===
 function startGenreQuiz(genre, subCat) {
   let list = rawData[genre] || [];
+
+  // 白地図学習の場合、問題データではない「MAP」行を出題対象から除外
+  if (genre === "白地図学習") {
+    list = list.filter(d => d.subCat !== "MAP");
+  }
+
   if (subCat !== "すべて") {
     list = list.filter(d => d.subCat === subCat);
   }
@@ -275,6 +296,13 @@ function showQuestion() {
     imgContainer.classList.add('hidden');
   }
 
+  // ★次問題の画像を裏で事前に読み込んで表示遅延を防止
+  const nextQ = currentQuestions[currentIndex + 1];
+  if (nextQ && nextQ.img && nextQ.img.trim() !== "") {
+    const imgPreload = new Image();
+    imgPreload.src = nextQ.img;
+  }
+
   updateQuizButtons(uState);
 
   if (currentQuizType === "map") {
@@ -377,7 +405,6 @@ function evaluateCurrentQuestion(statusType) {
   if (!userData[qId]) {
     userData[qId] = { status: 'unseen', favorite: false, level: 0, nextDueDate: today, firstDate: today };
   } else if (!userData[qId].firstDate) {
-    // 初めて解いた日を記録
     userData[qId].firstDate = today;
   }
 
@@ -564,7 +591,6 @@ function updateHomeProgress() {
 
   genres.forEach(g => {
     const list = rawData[g] || [];
-    // Lv.1 以上（1回以上正解）を達成判定
     const mastered = list.filter(q => (userData[q.id]?.level || 0) >= 1 || userData[q.id]?.status === 'mastered').length;
     const total = list.length;
     const pct = total > 0 ? Math.round((mastered / total) * 100) : 0;
@@ -690,7 +716,6 @@ function getLevelBadgeHTML(level = 0) {
   return `<span class="srs-badge lvl-0">未習得</span>`;
 }
 
-// 配列を偏りなくランダムにシャッフルする関数（Fisher-Yates）
 function shuffleArray(array) {
   for (let i = array.length - 1; i > 0; i--) {
     const j = Math.floor(Math.random() * (i + 1));
@@ -705,12 +730,9 @@ function getDailySrsQueue() {
   let dueList = [];
   let newList = [];
 
-  // localStorageから設定値を読み込み（設定がなければデフォルト値）
   const srsNew = parseInt(localStorage.getItem("sommelier_srs_new"), 10) || 20;
+  const srsMinNew = parseInt(localStorage.getItem("sommelier_srs_min_new"), 10) || 10;
   const srsMaxTotal = parseInt(localStorage.getItem("sommelier_srs_max_total"), 10) || 100;
-
-  const todayNewCount = Object.values(userData).filter(u => u.firstDate === today).length;
-  const remainingNewLimit = Math.max(0, srsNew - todayNewCount);
 
   Object.entries(rawData)
     .filter(([sheetName]) => !["白地図学習", "仕分け問題", "並び替え問題"].includes(sheetName))
@@ -726,19 +748,37 @@ function getDailySrsQueue() {
       });
     });
 
-  // 未回答問題から設定した新規上限数分をランダム抽出
+  const todayNewCount = Object.values(userData).filter(u => u.firstDate === today).length;
+  const maxNewSlots = Math.max(0, srsNew - todayNewCount);
+  const minNewSlots = Math.min(maxNewSlots, Math.max(0, srsMinNew - todayNewCount));
+
   shuffleArray(newList);
-  const pickedNewQuestions = newList.slice(0, remainingNewLimit);
+  
+  dueList.sort((a, b) => {
+    const dateA = userData[a.id]?.nextDueDate || today;
+    const dateB = userData[b.id]?.nextDueDate || today;
+    return dateA.localeCompare(dateB);
+  });
 
-  // 復習＋新規を合体してシャッフル
-  let queue = shuffleArray([...dueList, ...pickedNewQuestions]);
+  let selectedNew = [];
+  let selectedDue = [];
 
-  // 設定された「合計最大出題数」で上限を切る
-  if (queue.length > srsMaxTotal) {
-    queue = queue.slice(0, srsMaxTotal);
+  if (dueList.length + maxNewSlots <= srsMaxTotal) {
+    selectedNew = newList.slice(0, maxNewSlots);
+    selectedDue = dueList;
+  } else {
+    selectedNew = newList.slice(0, minNewSlots);
+    const remainingCapacity = Math.max(0, srsMaxTotal - selectedNew.length);
+    selectedDue = dueList.slice(0, remainingCapacity);
+    
+    const extraCapacity = srsMaxTotal - (selectedNew.length + selectedDue.length);
+    if (extraCapacity > 0 && newList.length > selectedNew.length) {
+      const extraNew = newList.slice(selectedNew.length, selectedNew.length + extraCapacity);
+      selectedNew.push(...extraNew);
+    }
   }
 
-  return queue;
+  return shuffleArray([...selectedDue, ...selectedNew]);
 }
 
 // === メイン復習カードのUI更新 ===

@@ -285,248 +285,135 @@
   </div>
 
 
-  <script>
-
+<script>
     const GAS_API_URL =
       "https://script.google.com/macros/s/AKfycbyJ3xJCkhakLUI_8mCsA6MPVrMXKTKuxIMSctkaJpnOmKFJ_ogq4hycm-3rtCcPMDBEKw/exec";
-
 
     let maps = [];
     let currentIndex = 0;
 
-
-    const mapSelect =
-      document.getElementById("map-select");
-
-    const mapCard =
-      document.getElementById("map-card");
-
-    const mapName =
-      document.getElementById("map-name");
-
-    const mapRegion =
-      document.getElementById("map-region");
-
-    const mapImage =
-      document.getElementById("map-image");
-
-    const mapImageLink =
-      document.getElementById("map-image-link");
-
-    const mapNote =
-      document.getElementById("map-note");
-
-    const mapStatus =
-      document.getElementById("map-status");
-
-    const prevButton =
-      document.getElementById("btn-prev");
-
-    const nextButton =
-      document.getElementById("btn-next");
-
+    const mapSelect = document.getElementById("map-select");
+    const mapCard = document.getElementById("map-card");
+    const mapName = document.getElementById("map-name");
+    const mapRegion = document.getElementById("map-region");
+    const mapImage = document.getElementById("map-image");
+    const mapImageLink = document.getElementById("map-image-link");
+    const mapNote = document.getElementById("map-note");
+    const mapStatus = document.getElementById("map-status");
+    const prevButton = document.getElementById("btn-prev");
+    const nextButton = document.getElementById("btn-next");
 
     async function init() {
-
       try {
-
         mapSelect.disabled = true;
 
-        const response =
-          await fetch(GAS_API_URL);
+        let rows = [];
+        const cached = localStorage.getItem('sommelier_quiz_data');
 
-        if (!response.ok) {
-          throw new Error("データ取得失敗");
+        // 1. localStorage（キャッシュ）から優先読み込み
+        if (cached) {
+          const allData = JSON.parse(cached);
+          rows = allData["白地図学習"] || [];
         }
 
-        const allData =
-          await response.json();
-
-        const rows =
-          allData["白地図学習"] || [];
-
+        // 2. キャッシュがない場合のみGAS通信
+        if (rows.length === 0) {
+          const response = await fetch(GAS_API_URL);
+          if (!response.ok) throw new Error("データ取得失敗");
+          const allData = await response.json();
+          rows = allData["白地図学習"] || [];
+        }
 
         maps = rows
-          .filter(row =>
-            String(row.subCat || "").trim() === "MAP"
-          )
-          .map(row => ({
-            id: String(row.id || "").trim(),
+          .filter(row => String(row.subCat || "").trim().toUpperCase() === "MAP")
+          .map((row, index) => ({
+            id: String(row.id || index + 1).trim(),
             region: String(row.q || "").trim(),
             title: String(row.a || "").trim(),
             note: String(row.note || "").trim(),
             img: String(row.img || "").trim()
           }))
-          .filter(map =>
-            map.id &&
-            map.region &&
-            map.title &&
-            map.img
-          );
-
+          .filter(map => map.region && map.title && map.img);
 
         if (maps.length === 0) {
-
-          mapSelect.innerHTML =
-            "<option>MAPが登録されていません</option>";
-
-          mapCard.innerHTML =
-            '<div class="map-error">白地図学習シートに、サブカテゴリ「MAP」のデータがありません。</div>';
-
+          mapSelect.innerHTML = "<option>MAPが登録されていません</option>";
+          mapCard.innerHTML = '<div class="map-error">白地図学習シートに、サブカテゴリ「MAP」のデータがありません。</div>';
           prevButton.disabled = true;
           nextButton.disabled = true;
-
           return;
         }
 
-
         renderSelect();
-
         mapSelect.disabled = false;
-
         loadMap(0);
 
-
       } catch (error) {
-
         console.error(error);
-
-        mapSelect.innerHTML =
-          "<option>データ取得エラー</option>";
-
-        mapCard.innerHTML =
-          '<div class="map-error">MAPデータの読み込みに失敗しました。</div>';
-
+        mapSelect.innerHTML = "<option>データ取得エラー</option>";
+        mapCard.innerHTML = '<div class="map-error">MAPデータの読み込みに失敗しました。</div>';
         prevButton.disabled = true;
         nextButton.disabled = true;
-
       }
 
-
-      mapSelect.addEventListener(
-        "change",
-        () => {
-          const index =
-            maps.findIndex(
-              map => map.id === mapSelect.value
-            );
-
-          if (index >= 0) {
-            loadMap(index);
-          }
+      mapSelect.addEventListener("change", () => {
+        const index = maps.findIndex(map => map.id === mapSelect.value);
+        if (index >= 0) {
+          loadMap(index);
         }
-      );
-
-
-      prevButton.addEventListener(
-        "click",
-        () => {
-          if (currentIndex <= 0) return;
-          loadMap(currentIndex - 1);
-        }
-      );
-
-
-      nextButton.addEventListener(
-        "click",
-        () => {
-          if (currentIndex >= maps.length - 1) return;
-          loadMap(currentIndex + 1);
-        }
-      );
-
-    }
-
-
-    function renderSelect() {
-
-      mapSelect.innerHTML = "";
-
-      maps.forEach(map => {
-
-        const option =
-          document.createElement("option");
-
-        option.value =
-          map.id;
-
-        option.textContent =
-          map.region;
-
-        mapSelect.appendChild(option);
-
       });
 
+      prevButton.addEventListener("click", () => {
+        if (currentIndex <= 0) return;
+        loadMap(currentIndex - 1);
+      });
+
+      nextButton.addEventListener("click", () => {
+        if (currentIndex >= maps.length - 1) return;
+        loadMap(currentIndex + 1);
+      });
     }
 
+    function renderSelect() {
+      mapSelect.innerHTML = "";
+      const fragment = document.createDocumentFragment();
+
+      maps.forEach(map => {
+        const option = document.createElement("option");
+        option.value = map.id;
+        option.textContent = map.region;
+        fragment.appendChild(option);
+      });
+
+      mapSelect.appendChild(fragment);
+    }
 
     function loadMap(index) {
-
       currentIndex = index;
-
-      const map =
-        maps[currentIndex];
-
+      const map = maps[currentIndex];
       if (!map) return;
 
-
-      mapSelect.value =
-        map.id;
-
-      mapName.textContent =
-        map.title;
-
-      mapRegion.textContent =
-        map.region;
-
-
-      mapImage.src =
-        map.img;
-
-      mapImage.alt =
-        map.title;
-
-      mapImageLink.href =
-        map.img;
-
+      mapSelect.value = map.id;
+      mapName.textContent = map.title;
+      mapRegion.textContent = map.region;
+      mapImage.src = map.img;
+      mapImage.alt = map.title;
+      mapImageLink.href = map.img;
 
       if (map.note) {
-
-        mapNote.textContent =
-          map.note;
-
-        mapNote.classList.add(
-          "is-visible"
-        );
-
+        mapNote.textContent = map.note;
+        mapNote.classList.add("is-visible");
       } else {
-
         mapNote.textContent = "";
-
-        mapNote.classList.remove(
-          "is-visible"
-        );
-
+        mapNote.classList.remove("is-visible");
       }
 
-
-      prevButton.disabled =
-        currentIndex === 0;
-
-      nextButton.disabled =
-        currentIndex === maps.length - 1;
-
-
-      mapStatus.textContent =
-        `${currentIndex + 1} / ${maps.length}`;
-
+      prevButton.disabled = currentIndex === 0;
+      nextButton.disabled = currentIndex === maps.length - 1;
+      mapStatus.textContent = `${currentIndex + 1} / ${maps.length}`;
     }
 
-
     init();
-
   </script>
 
 </body>
-
 </html>

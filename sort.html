@@ -298,166 +298,89 @@
 <script src="study-tracking.js"></script>
 
 <script>
-
   const GAS_API_URL =
     "https://script.google.com/macros/s/AKfycbyJ3xJCkhakLUI_8mCsA6MPVrMXKTKuxIMSctkaJpnOmKFJ_ogq4hycm-3rtCcPMDBEKw/exec";
-
 
   let sortSets = [];
   let currentSet = null;
   let answers = {};
   let checked = false;
 
-
-  const setSelect =
-    document.getElementById("sort-set-select");
-
-  const sortList =
-    document.getElementById("sort-list");
-
-  const summary =
-    document.getElementById("sort-summary");
-
-  const scoreMain =
-    document.getElementById("sort-score-main");
-
-  const completeList =
-    document.getElementById("complete-list");
-
+  const setSelect = document.getElementById("sort-set-select");
+  const sortList = document.getElementById("sort-list");
+  const summary = document.getElementById("sort-summary");
+  const scoreMain = document.getElementById("sort-score-main");
+  const completeList = document.getElementById("complete-list");
 
   async function init() {
-
     try {
-
-      setSelect.innerHTML =
-        '<option>読み込み中...</option>';
-
+      setSelect.innerHTML = '<option>読み込み中...</option>';
       setSelect.disabled = true;
 
+      let rows = [];
+      const cached = localStorage.getItem('sommelier_quiz_data');
 
-      const response =
-        await fetch(`${GAS_API_URL}?t=${Date.now()}`, {
-          cache: "no-store"
-        });
-
-      if (!response.ok) {
-        throw new Error("データ取得失敗");
+      // 1. localStorage（キャッシュ）から優先読み込み
+      if (cached) {
+        const allData = JSON.parse(cached);
+        rows = allData["仕分け問題"] || [];
       }
 
-
-      const allData =
-        await response.json();
-
-      const rows =
-        allData["仕分け問題"] || [];
-
+      // 2. キャッシュがない場合のみGAS通信
+      if (rows.length === 0) {
+        const response = await fetch(`${GAS_API_URL}?t=${Date.now()}`, { cache: "no-store" });
+        if (!response.ok) throw new Error("データ取得失敗");
+        const allData = await response.json();
+        rows = allData["仕分け問題"] || [];
+      }
 
       if (rows.length === 0) {
-
-        setSelect.innerHTML =
-          '<option>問題が登録されていません</option>';
-
+        setSelect.innerHTML = '<option>問題が登録されていません</option>';
         return;
       }
 
-
       createSortSets(rows);
-
       renderSetSelect();
 
-
       setSelect.disabled = false;
-
 
       if (sortSets.length > 0) {
         loadSet(sortSets[0].id);
       }
 
-
     } catch (error) {
-
       console.error(error);
-
-      setSelect.innerHTML =
-        '<option>データ取得エラー</option>';
-
-      alert(
-        "仕分け問題の読み込みに失敗しました。"
-      );
-
+      setSelect.innerHTML = '<option>データ取得エラー</option>';
+      alert("仕分け問題の読み込みに失敗しました。");
     }
 
-
-    setSelect.addEventListener(
-      "change",
-      () => loadSet(setSelect.value)
-    );
-
-
-    document.getElementById(
-      "btn-check"
-    ).addEventListener(
-      "click",
-      checkAnswers
-    );
-
-
-    document.getElementById(
-      "btn-reset"
-    ).addEventListener(
-      "click",
-      resetQuiz
-    );
-
+    setSelect.addEventListener("change", () => loadSet(setSelect.value));
+    document.getElementById("btn-check").addEventListener("click", checkAnswers);
+    document.getElementById("btn-reset").addEventListener("click", resetQuiz);
   }
 
-
   function createSortSets(rows) {
-
     const themeMap = {};
 
-
     rows.forEach(row => {
+      const theme = String(row.theme || "").trim();
+      const item = String(row.item || "").trim();
+      const group = String(row.group || "").trim();
 
-      const theme =
-        String(row.theme || "").trim();
-
-      const item =
-        String(row.item || "").trim();
-
-      const group =
-        String(row.group || "").trim();
-
-
-      if (
-        !theme ||
-        !item ||
-        !group
-      ) {
-        return;
-      }
-
+      if (!theme || !item || !group) return;
 
       if (!themeMap[theme]) {
-
         themeMap[theme] = {
           id: theme,
           title: theme,
           groups: [],
           items: []
         };
-
       }
 
-
-      if (
-        !themeMap[theme].groups.includes(group)
-      ) {
-
+      if (!themeMap[theme].groups.includes(group)) {
         themeMap[theme].groups.push(group);
-
       }
-
 
       themeMap[theme].items.push({
         id: row.id,
@@ -465,344 +388,165 @@
         answer: group,
         note: row.note || ""
       });
-
     });
 
-
-    sortSets =
-      Object.values(themeMap);
-
+    sortSets = Object.values(themeMap);
   }
-
 
   function renderSetSelect() {
-
     setSelect.innerHTML = "";
-
-
     sortSets.forEach(set => {
-
-      const option =
-        document.createElement("option");
-
-      option.value =
-        set.id;
-
-      option.textContent =
-        set.title;
-
+      const option = document.createElement("option");
+      option.value = set.id;
+      option.textContent = set.title;
       setSelect.appendChild(option);
-
     });
-
   }
-
 
   function loadSet(setId) {
-
-    currentSet =
-      sortSets.find(
-        set => set.id === setId
-      );
-
-
-    if (!currentSet) {
-      return;
-    }
-
+    currentSet = sortSets.find(set => set.id === setId);
+    if (!currentSet) return;
 
     answers = {};
     checked = false;
-
     summary.classList.add("hidden");
-
     renderQuestions();
-
   }
 
-
-  function renderQuestions() {
-
+ function renderQuestions() {
     sortList.innerHTML = "";
+    const fragment = document.createDocumentFragment();
 
+    currentSet.items.forEach((item, index) => {
+      const row = document.createElement("div");
+      row.className = "sort-row";
 
-    currentSet.items.forEach(
-      (item, index) => {
+      const selected = answers[index];
 
-        const row =
-          document.createElement("div");
-
-        row.className =
-          "sort-row";
-
-
-        const selected =
-          answers[index];
-
-
-        if (checked) {
-
-          if (selected === item.answer) {
-            row.classList.add("correct");
-          } else {
-            row.classList.add("wrong");
-          }
-
-        }
-
-
-        const name =
-          document.createElement("div");
-
-        name.className =
-          "sort-name";
-
-        name.textContent =
-          item.name;
-
-        row.appendChild(name);
-
-
-        const options =
-          document.createElement("div");
-
-        options.className =
-          "sort-options";
-
-
-        currentSet.groups.forEach(
-          group => {
-
-            const button =
-              document.createElement("button");
-
-            button.type =
-              "button";
-
-            button.className =
-              "sort-option";
-
-            button.textContent =
-              group;
-
-
-            if (selected === group) {
-              button.classList.add("selected");
-            }
-
-
-            if (checked) {
-              button.disabled = true;
-            }
-
-
-            button.addEventListener(
-              "click",
-              () => {
-
-                if (checked) {
-                  return;
-                }
-
-                answers[index] =
-                  group;
-
-                renderQuestions();
-
-              }
-            );
-
-
-            options.appendChild(button);
-
-          }
-        );
-
-
-        row.appendChild(options);
-
-
-        if (checked) {
-
-          const result =
-            document.createElement("div");
-
-          result.className =
-            "sort-result-text";
-
-
-          if (selected === item.answer) {
-
-            result.textContent =
-              `○ 正解：${item.answer}`;
-
-          } else {
-
-            result.textContent =
-              `× ${selected || "未回答"} → 正解：${item.answer}`;
-
-          }
-
-
-          row.appendChild(result);
-
-        }
-
-
-        sortList.appendChild(row);
-
-      }
-    );
-
-  }
-
-
-function checkAnswers() {
-
-  if (
-    !currentSet ||
-    checked
-  ) {
-    return;
-  }
-
-
-  checked = true;
-
-
-  // 実際に回答した項目数を今日の学習数に加算
-  const answeredCount =
-    Object.keys(answers).length;
-
-  StudyTracker.record(
-    answeredCount
-  );
-
-
-  let correctCount = 0;
-
-
-  currentSet.items.forEach(
-    (item, index) => {
-
-      if (
-        answers[index] ===
-        item.answer
-      ) {
-        correctCount++;
+      if (checked) {
+        row.classList.add(selected === item.answer ? "correct" : "wrong");
       }
 
-    }
-  );
+      const name = document.createElement("div");
+      name.className = "sort-name";
+      name.textContent = item.name;
+      row.appendChild(name);
 
+      const options = document.createElement("div");
+      options.className = "sort-options";
 
-  renderQuestions();
+      currentSet.groups.forEach(group => {
+        const button = document.createElement("button");
+        button.type = "button";
+        button.className = "sort-option";
+        button.textContent = group;
 
-  renderCompleteList();
+        if (selected === group) {
+          button.classList.add("selected");
+        }
 
+        if (checked) {
+          button.disabled = true;
+        }
 
-  scoreMain.textContent =
-    `${correctCount} / ${currentSet.items.length}`;
-
-
-  summary.classList.remove(
-    "hidden"
-  );
-
-
-  summary.scrollIntoView({
-    behavior: "smooth",
-    block: "start"
-  });
-
-}
-
-  function renderCompleteList() {
-
-    completeList.innerHTML = "";
-
-
-    currentSet.groups.forEach(
-      groupName => {
-
-        const group =
-          document.createElement("div");
-
-        group.className =
-          "complete-group";
-
-
-        const title =
-          document.createElement("div");
-
-        title.className =
-          "complete-group-title";
-
-        title.textContent =
-          groupName;
-
-        group.appendChild(title);
-
-
-        const items =
-          currentSet.items.filter(
-            item =>
-              item.answer === groupName
-          );
-
-
-        items.forEach(item => {
-
-          const row =
-            document.createElement("div");
-
-          row.className =
-            "complete-item";
-
-          row.textContent =
-            item.name;
-
-          group.appendChild(row);
-
+        // ★修正: 全体再描画を廃止し、この行のボタン表示だけを即座に変更する
+        button.addEventListener("click", () => {
+          if (checked) return;
+          answers[index] = group;
+          
+          options.querySelectorAll('.sort-option').forEach(btn => {
+            btn.classList.toggle('selected', btn.textContent === group);
+          });
         });
 
+        options.appendChild(button);
+      });
 
-        completeList.appendChild(group);
+      row.appendChild(options);
 
+      if (checked) {
+        const result = document.createElement("div");
+        result.className = "sort-result-text";
+
+        if (selected === item.answer) {
+          result.textContent = `○ 正解：${item.answer}`;
+        } else {
+          result.textContent = `× ${selected || "未回答"} → 正解：${item.answer}`;
+        }
+
+        row.appendChild(result);
       }
-    );
 
-  }
-
-
-  function resetQuiz() {
-
-    if (!currentSet) {
-      return;
-    }
-
-
-    answers = {};
-    checked = false;
-
-    summary.classList.add(
-      "hidden"
-    );
-
-    renderQuestions();
-
-    window.scrollTo({
-      top: 0,
-      behavior: "smooth"
+      fragment.appendChild(row);
     });
 
+    sortList.appendChild(fragment);
   }
 
 
-  init();
 
+  function checkAnswers() {
+    if (!currentSet || checked) return;
+
+    checked = true;
+
+    const answeredCount = Object.keys(answers).length;
+    StudyTracker.record(answeredCount);
+
+    let correctCount = 0;
+    currentSet.items.forEach((item, index) => {
+      if (answers[index] === item.answer) {
+        correctCount++;
+      }
+    });
+
+    renderQuestions();
+    renderCompleteList();
+
+    scoreMain.textContent = `${correctCount} / ${currentSet.items.length}`;
+    summary.classList.remove("hidden");
+    summary.scrollIntoView({ behavior: "smooth", block: "start" });
+  }
+
+  function renderCompleteList() {
+    completeList.innerHTML = "";
+    const fragment = document.createDocumentFragment();
+
+    currentSet.groups.forEach(groupName => {
+      const group = document.createElement("div");
+      group.className = "complete-group";
+
+      const title = document.createElement("div");
+      title.className = "complete-group-title";
+      title.textContent = groupName;
+      group.appendChild(title);
+
+      const items = currentSet.items.filter(item => item.answer === groupName);
+
+      items.forEach(item => {
+        const row = document.createElement("div");
+        row.className = "complete-item";
+        row.textContent = item.name;
+        group.appendChild(row);
+      });
+
+      fragment.appendChild(group);
+    });
+
+    completeList.appendChild(fragment);
+  }
+
+  function resetQuiz() {
+    if (!currentSet) return;
+    answers = {};
+    checked = false;
+    summary.classList.add("hidden");
+    renderQuestions();
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  }
+
+  init();
 </script>
 
 </body>
-
 </html>
