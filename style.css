@@ -330,16 +330,16 @@ select:focus-visible {
 }
 
 .quiz-card {
-  margin-bottom: 11px;
-  padding: 20px 17px;
-  border: 1px solid var(--line);
+  margin-bottom: 20px;
+  padding: 22px 18px 24px;
+  border: none;
   border-radius: var(--radius-card);
   background: var(--surface);
-  box-shadow: none;
+  box-shadow: 0 4px 16px rgba(37, 35, 31, 0.04);
 }
 
 .q-text {
-  margin: 0 0 22px;
+  margin: 0 0 20px;
   color: var(--text);
   font-size: clamp(17px, 4.6vw, 19px);
   font-weight: 750;
@@ -362,9 +362,10 @@ select:focus-visible {
 
 .btn-reveal {
   width: 100%;
+  margin-top: 10px;
   background: var(--memory);
   color: #fff;
-  border-color: var(--memory);
+  border: none;
 }
 
 .a-text strong,
@@ -373,9 +374,10 @@ select:focus-visible {
 }
 
 .a-box {
-  margin: 20px 0 12px;
-  padding: 15px;
-  border-left: 3px solid var(--memory);
+  margin: 18px 0 12px;
+  padding: 14px 16px;
+  border: none;
+  border-left: 4px solid var(--memory);
   border-radius: 8px;
   background: var(--memory-soft);
 }
@@ -387,7 +389,7 @@ select:focus-visible {
 }
 
 .a-text {
-  margin: 5px 0 0;
+  margin: 4px 0 0;
   color: var(--text);
   font-size: 18px;
   font-weight: 800;
@@ -395,45 +397,48 @@ select:focus-visible {
 }
 
 .note-box {
-  margin-bottom: 14px;
-  padding: 14px 15px;
-  border: 1px solid var(--line);
+  margin-bottom: 20px;
+  padding: 14px 16px;
+  border: none;
   border-radius: 10px;
   background: var(--surface-soft);
 }
 
 .note-text {
-  margin: 5px 0 0;
+  margin: 4px 0 0;
   color: #5F5F5F;
   font-size: 13px;
   font-weight: 500;
   line-height: 1.7;
 }
 
-.eval-buttons { margin-top: 16px; }
+.eval-buttons { 
+  margin-top: 18px; 
+}
 
 .btn-eval {
   min-height: 50px;
-  border: 1px solid var(--line);
+  border: none;
   border-radius: var(--radius-button);
   cursor: pointer;
-  font-size: 13px;
+  font-size: 13.5px;
   font-weight: 800;
 }
 
 .btn-weak-eval {
   color: var(--danger);
   background: var(--danger-soft);
-  border-color: #EACDCD;
 }
 
 .btn-master-eval {
   color: var(--success);
   background: var(--success-soft);
-  border-color: #CFE2D6;
 }
 
-.quiz-footer-grid { grid-template-columns: .9fr 1.4fr; }
+.quiz-footer-grid {
+  grid-template-columns: .9fr 1.4fr;
+  margin-top: 18px;
+}
 .btn-main-next { min-height: 48px; }
 .btn-fav-small { color: #7A5D2D; }
 
@@ -454,7 +459,7 @@ select:focus-visible {
   border-radius: var(--radius-button);
   background: var(--surface);
   color: var(--text);
-  font-size: 16px; /* Prevents iOS auto-zoom on focus. */
+  font-size: 16px;
   outline: none;
 }
 
@@ -526,7 +531,6 @@ select:focus-visible {
   .btn-action:hover { background: var(--primary-hover); border-color: var(--primary-hover); }
 }
 
-/* Typical smartphone widths: keep the 2-column categories, tighten only spacing. */
 @media (max-width: 380px) {
   body { padding-left: 11px; padding-right: 11px; }
   .menu-grid { gap: 8px; }
@@ -536,7 +540,6 @@ select:focus-visible {
   .quick-grid, .tool-grid { gap: 8px; }
 }
 
-/* Settings become vertical on phones so long select labels never get squeezed. */
 @media (max-width: 430px) {
   .setting-item {
     align-items: stretch;
@@ -552,7 +555,6 @@ select:focus-visible {
   }
 }
 
-/* Very narrow legacy devices still retain the requested 2-column category layout. */
 @media (max-width: 330px) {
   body { padding-left: 8px; padding-right: 8px; }
   .btn-card { padding-left: 9px; padding-right: 9px; }
@@ -562,7 +564,6 @@ select:focus-visible {
 }
 
 /* ---------- White Map ---------- */
-
 .map-choice-group {
   display: grid;
   grid-template-columns: repeat(5, minmax(0, 1fr));
@@ -593,9 +594,7 @@ select:focus-visible {
   border-color: #EACDCD;
 }
 
-.map-choice-btn:disabled {
-  cursor: default;
-}
+.map-choice-btn:disabled { cursor: default; }
 
 .map-feedback {
   margin-top: 14px;
@@ -605,10 +604,7 @@ select:focus-visible {
   background: var(--surface-soft);
 }
 
-.map-feedback-title {
-  font-size: 15px;
-  font-weight: 800;
-}
+.map-feedback-title { font-size: 15px; font-weight: 800; }
 
 .map-feedback-note {
   margin-top: 5px;
@@ -639,61 +635,34 @@ select:focus-visible {
   font-weight: 800;
 }
 
-.map-result-name {
-  font-size: 13px;
-  font-weight: 650;
-}
-
-.map-result-row.is-wrong {
-  background: var(--danger-soft);
-}
-
-.map-result-mark {
-  text-align: center;
-  font-weight: 800;
-}
-
-.map-result-row.is-wrong .map-result-mark {
-  color: var(--danger);
-}
-
-.map-result-row.is-correct .map-result-mark {
-  color: var(--success);
-}
+.map-result-name { font-size: 13px; font-weight: 650; }
+.map-result-row.is-wrong { background: var(--danger-soft); }
+.map-result-mark { text-align: center; font-weight: 800; }
+.map-result-row.is-wrong .map-result-mark { color: var(--danger); }
+.map-result-row.is-correct .map-result-mark { color: var(--success); }
 
 @media (max-width: 380px) {
-  .map-choice-group {
-    grid-template-columns: repeat(4, minmax(0, 1fr));
-  }
+  .map-choice-group { grid-template-columns: repeat(4, minmax(0, 1fr)); }
 }
 
-/* ===============================
-   学習目標・連続達成
-================================ */
-
+/* ---------- Study Status ---------- */
 .study-status {
   margin-top: 18px;
   padding: 14px 15px;
-
   border: 1px solid var(--line);
   border-radius: var(--radius-card);
-
   background: var(--surface);
-
   text-align: left;
 }
-
 
 .study-today {
   display: flex;
   align-items: baseline;
   gap: 4px;
-
   color: var(--text);
   font-size: 12px;
   font-weight: 700;
 }
-
 
 .study-today strong {
   color: var(--primary);
@@ -701,75 +670,42 @@ select:focus-visible {
   font-weight: 800;
 }
 
-
-/* 今日の進捗バー */
-
 .study-progress-track {
   overflow: hidden;
-
   width: 100%;
   height: 7px;
-
   margin-top: 9px;
-
   border-radius: 999px;
-
   background: var(--surface-soft);
 }
-
 
 .study-progress-fill {
   width: 0%;
   height: 100%;
-
   border-radius: 999px;
-
   background: var(--accent);
-
   transition: width .35s ease;
 }
-
-
-/* 連続達成 */
 
 .study-streak {
   display: flex;
   justify-content: space-between;
   align-items: center;
   gap: 12px;
-
   margin-top: 10px;
-
   color: var(--muted);
   font-size: 11px;
   font-weight: 700;
 }
 
-
-.study-streak strong {
-  color: var(--primary);
-  font-size: 14px;
-}
-
-
-/* スマホ */
+.study-streak strong { color: var(--primary); font-size: 14px; }
 
 @media (max-width: 380px) {
-
-  .study-status {
-    padding: 12px 13px;
-  }
-
-  .study-streak {
-    gap: 6px;
-    font-size: 10px;
-  }
-
+  .study-status { padding: 12px 13px; }
+  .study-streak { gap: 6px; font-size: 10px; }
 }
 
-/* ===============================
-   メインAI復習・学習カード
-================================ */
+/* ---------- Main AI Card ---------- */
 .main-ai-card {
   margin-bottom: 20px;
   padding: 20px 16px;
@@ -818,7 +754,6 @@ select:focus-visible {
   cursor: default;
 }
 
-/* SRSレベルバッジ */
 .srs-badge {
   display: inline-block;
   padding: 2px 7px;
@@ -843,9 +778,7 @@ select:focus-visible {
   border: 1px solid var(--accent);
 }
 
-/* ===============================
-   AI設定モーダル（ポップアップ）
-================================ */
+/* ---------- Modals ---------- */
 .modal-backdrop {
   position: fixed;
   top: 0;
@@ -878,7 +811,6 @@ select:focus-visible {
   text-align: center;
 }
 
-/* 項目を横並びにピシッと揃える */
 .modal-card .setting-item {
   display: flex !important;
   flex-direction: row !important;
@@ -915,7 +847,6 @@ select:focus-visible {
   background: #fff;
 }
 
-/* ボタンを均等に2つ並べる */
 .modal-actions {
   display: flex;
   gap: 10px;
@@ -927,104 +858,6 @@ select:focus-visible {
   min-height: 46px;
 }
 
-
-
-/* ---------- 設定カード全体 ---------- */
-.setting-card {
-  margin-bottom: 14px;
-  padding: 0 16px;
-  border: 1px solid var(--line);
-  border-radius: var(--radius-card);
-  background: var(--surface);
-}
-
-.setting-item {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  min-height: 56px;
-  padding: 8px 0;
-  border-bottom: 1px solid var(--line);
-  font-size: 13px;
-  font-weight: 650;
-}
-
-.setting-item:last-child {
-  border-bottom: 0;
-}
-
-/* 右側に並ぶ全パーツ（select / 数値入力エリア / ボタン）の幅・高さを210px×38pxで完全統一 */
-.setting-item > select,
-.setting-item > div,
-.setting-item > button {
-  width: 210px;
-  height: 38px;
-  box-sizing: border-box;
-}
-
-/* ドロップダウン（select）のデザイン統一 */
-.setting-item select {
-  padding: 0 10px;
-  border: 1px solid var(--line);
-  border-radius: 8px;
-  background: #fff;
-  color: var(--text);
-  font-size: 13px;
-  font-weight: 600;
-  outline: none;
-}
-
-/* 「1日の学習目標」エリアのデザイン統一 */
-.setting-item > div {
-  display: flex;
-  align-items: center;
-  justify-content: flex-end;
-  gap: 6px;
-}
-
-.setting-item > div input[type="number"] {
-  width: 60px;
-  height: 34px;
-  padding: 0 4px;
-  border: 1px solid var(--line);
-  border-radius: 6px;
-  background: #fff;
-  color: var(--text);
-  font-size: 13px;
-  font-weight: 700;
-  text-align: center;
-  outline: none;
-}
-
-.setting-item > div span {
-  font-size: 13px;
-  font-weight: 600;
-  color: var(--text);
-}
-
-/* 「条件を設定する」ボタンのデザインをselectと完全に合わせる */
-.setting-item > button {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 6px;
-  padding: 0 10px;
-  border: 1px solid var(--line);
-  border-radius: 8px;
-  background: #fff;
-  color: var(--text);
-  font-size: 13px;
-  font-weight: 600;
-  cursor: pointer;
-}
-
-.setting-item > button:hover {
-  background: var(--surface-soft);
-}
-
-/* === style.css の末尾（右端・四角ボタン版） === */
-
-/* タイトル行を両端揃えにして右端に配置 */
 .header-title-container {
   display: flex;
   align-items: center;
@@ -1032,11 +865,10 @@ select:focus-visible {
   width: 100%;
 }
 
-/* 右端の四角い?ボタン */
 .btn-help {
   width: 34px;
   height: 34px;
-  border-radius: 8px; /* 角丸の四角 */
+  border-radius: 8px;
   border: 1px solid var(--line);
   background: var(--surface);
   color: var(--primary);
@@ -1055,7 +887,6 @@ select:focus-visible {
   border-color: var(--primary);
 }
 
-/* ヘルプモーダルのレイアウト */
 .modal-help-card {
   max-width: 480px;
   max-height: 80vh;
@@ -1063,29 +894,297 @@ select:focus-visible {
   text-align: left;
 }
 
-.help-section {
-  margin-bottom: 16px;
-}
+.help-section { margin-bottom: 20px; }
 
 .help-section strong {
   display: block;
-  margin-bottom: 4px;
+  margin-bottom: 6px;
   color: var(--primary);
+  font-size: 14px;
 }
 
 .help-section p, .help-section ul {
-  font-size: 13px;
+  font-size: 12.5px;
   line-height: 1.6;
   margin: 0;
   color: var(--text);
 }
 
-.help-section ul {
-  padding-left: 18px;
+.help-section ul { padding-left: 18px; }
+
+.srs-diagram-container {
+  margin: 12px 0;
+  padding: 14px;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-card);
 }
 
-.help-section ul ul {
-  margin-top: 4px;
-  padding-left: 14px;
+.srs-step-list {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.srs-step-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 9px 12px;
+  background: #ffffff;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  font-size: 12px;
+}
+
+.srs-step-item.is-grand-cru {
+  background: var(--accent-soft);
+  border-color: var(--accent);
+}
+
+.srs-step-arrow {
+  text-align: center;
   color: var(--muted);
+  font-size: 10px;
+  line-height: 1;
+}
+
+.srs-reset-alert {
+  margin-top: 10px;
+  padding: 8px 10px;
+  background: var(--danger-soft);
+  border: 1px solid #EACDCD;
+  border-radius: 6px;
+  font-size: 11px;
+  color: var(--danger);
+  font-weight: 700;
+  line-height: 1.4;
+}
+
+.srs-capacity-title {
+  text-align: center;
+  font-weight: 800;
+  font-size: 12px;
+  color: var(--primary);
+  padding-bottom: 8px;
+  border-bottom: 1px dashed var(--line);
+  margin-bottom: 10px;
+}
+
+.srs-capacity-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+
+.srs-capacity-card {
+  padding: 10px;
+  background: #ffffff;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  font-size: 12px;
+}
+
+.srs-capacity-card.is-new { border-top: 3px solid var(--accent); }
+.srs-capacity-card.is-review { border-top: 3px solid var(--primary); }
+
+.srs-capacity-card-title {
+  font-size: 11.5px;
+  font-weight: 800;
+  margin-bottom: 4px;
+}
+
+.srs-capacity-card.is-new .srs-capacity-card-title { color: var(--accent); }
+.srs-capacity-card.is-review .srs-capacity-card-title { color: var(--primary); }
+
+.srs-capacity-card-desc {
+  font-size: 10.5px;
+  color: var(--muted);
+  line-height: 1.4;
+}
+
+/* ---------- AI Gemini Modal ---------- */
+.modal-gemini-card {
+  width: 90%;
+  max-width: 420px;
+  padding: 20px 16px;
+}
+
+.gemini-summary-box {
+  padding: 8px 12px;
+  background: var(--surface-soft);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  margin-bottom: 12px;
+  text-align: left;
+}
+
+.gemini-summary-text {
+  margin: 3px 0 0;
+  font-size: 11.5px;
+  font-weight: 600;
+  color: var(--text);
+  line-height: 1.4;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.gemini-chat-log {
+  max-height: 240px;
+  overflow-y: auto;
+  padding: 10px;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  margin-bottom: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  text-align: left;
+}
+
+.gemini-msg-ai {
+  padding: 10px 12px;
+  background: #ffffff;
+  border: 1px solid var(--line);
+  border-left: 3px solid var(--primary);
+  border-radius: 8px;
+  font-size: 13px;
+  line-height: 1.6;
+  color: var(--text);
+}
+
+.gemini-msg-user {
+  align-self: flex-end;
+  max-width: 85%;
+  padding: 8px 12px;
+  background: var(--primary-soft);
+  color: var(--primary);
+  border: 1px solid #E5DCDD;
+  border-radius: 8px;
+  font-size: 12.5px;
+  font-weight: 700;
+  line-height: 1.5;
+}
+
+.gemini-loading-box {
+  padding: 12px;
+  text-align: center;
+}
+
+.gemini-loading-dots {
+  display: flex;
+  justify-content: center;
+  gap: 6px;
+  margin-bottom: 6px;
+}
+
+.gemini-loading-dots span {
+  width: 7px;
+  height: 7px;
+  background: var(--primary);
+  border-radius: 50%;
+  animation: gemini-pulse 1.2s infinite ease-in-out both;
+}
+
+.gemini-loading-dots span:nth-child(2) { animation-delay: 0.2s; }
+.gemini-loading-dots span:nth-child(3) { animation-delay: 0.4s; }
+
+@keyframes gemini-pulse {
+  0%, 80%, 100% { transform: scale(0.6); opacity: 0.4; }
+  40% { transform: scale(1); opacity: 1; }
+}
+
+.gemini-loading-text {
+  margin: 0;
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--muted);
+}
+
+.gemini-input-group {
+  display: flex;
+  gap: 8px;
+}
+
+#gemini-user-input {
+  flex: 1;
+  height: 42px;
+  padding: 0 12px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-button);
+  background: var(--surface);
+  color: var(--text);
+  font-size: 13px;
+  outline: none;
+}
+
+#gemini-user-input:focus { border-color: var(--primary); }
+
+.btn-gemini-send {
+  min-height: 42px;
+  padding: 0 16px;
+  font-size: 12px;
+  white-space: nowrap;
+}
+
+/* ---------- 解説カードフッター（破線区切り＆ボタン整列完全統一） ---------- */
+.note-box-footer {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 8px;
+  margin-top: 12px;
+  padding-top: 10px;
+  border-top: 1px dashed var(--line);
+}
+
+.btn-report-inline {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  height: 34px;
+  padding: 0 12px;
+  background: #ffffff;
+  color: var(--primary);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  font-size: 11.5px;
+  font-weight: 800;
+  cursor: pointer;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+  transition: background-color 0.15s ease, border-color 0.15s ease;
+}
+
+.btn-report-inline:hover {
+  background: var(--primary-soft);
+  border-color: var(--primary);
+}
+
+.btn-ask-gemini-inline {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  height: 34px;
+  padding: 0 12px;
+  background: #ffffff;
+  color: var(--primary);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  font-size: 11.5px;
+  font-weight: 800;
+  cursor: pointer;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+  transition: background-color 0.15s ease, border-color 0.15s ease;
+}
+
+.btn-ask-gemini-inline:hover {
+  background: var(--primary-soft);
+  border-color: var(--primary);
+}
+
+.btn-ask-gemini-inline span {
+  font-size: 11px;
+  color: var(--accent);
 }

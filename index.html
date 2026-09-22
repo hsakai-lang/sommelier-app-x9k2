@@ -175,13 +175,22 @@
 
       <div id="quiz-answer-group" class="hidden answer-animate">
         <div class="a-box"><span class="label">正解</span><p id="quiz-answer" class="a-text"></p></div>
-        <div id="quiz-note-box" class="note-box hidden"><span class="label">解説・ポイント</span><p id="quiz-note" class="note-text"></p></div>
+        <div id="quiz-note-box" class="note-box hidden">
+          <span class="label">解説・ポイント</span>
+          <p id="quiz-note" class="note-text"></p>
+          <div class="note-box-footer">
+            <button type="button" class="btn-report-inline" onclick="openFeedbackModal('quiz')">⚠️ 不備報告</button>
+            <button type="button" class="btn-ask-gemini-inline" onclick="openGeminiModal()">
+              <span>🍷</span> AIソムリエに詳しく聞く
+            </button>
+          </div>
+        </div>
         <div class="eval-buttons">
           <button id="btn-status-weak" class="btn-eval btn-weak-eval" onclick="evaluateCurrentQuestion('weak')">✕ まだ</button>
           <button id="btn-status-mastered" class="btn-eval btn-master-eval" onclick="evaluateCurrentQuestion('mastered')">◯ 覚えた</button>
         </div>
       </div>
-    </div>
+    </div> 
 
     <div class="quiz-footer-grid">
       <button id="btn-prev-question" class="btn btn-glass" onclick="prevQuestion()">← 前へ</button>
@@ -255,6 +264,7 @@
     </div> <!-- ★修正：ここで setting-card を正しく閉じる -->
 
     <button class="btn btn-action btn-sync btn-full" onclick="fetchDataFromGAS()">シートから最新データを同期</button>
+    <button type="button" class="btn btn-glass btn-full" style="margin-top: 10px;" onclick="openFeedbackModal('general')">💬 不備報告・ご意見を送る</button>
 
     <div class="status-box">
       <div class="stat-pill"><span id="stat-total">0</span><span>総問題数</span></div>
@@ -319,39 +329,121 @@
         </section>
 
         <section class="help-section">
-          <strong>2. AI出題（SRS）の復習タイミング</strong>
-          <p>回答後の「◯ 覚えた」「✕ まだ」の選択に応じて、次回出題までの日数が自動更新されます。</p>
-          <ul>
-            <li><strong>「✕ まだ」</strong>：レベル0にリセットされ、今日中に再出題されます。</li>
-            <li><strong>「◯ 覚えた」</strong>：正解するたびにレベルが上がり、復習間隔が伸びます。
-              <ul>
-                <li>レベル1（✓）：1日後</li>
-                <li>レベル2（✓✓）：3日後</li>
-                <li>レベル3（✓✓✓）：7日後</li>
-                <li>レベル4（👑 Grand Cru）：14日後</li>
-              </ul>
-            </li>
-          </ul>
+          <strong>2. AI復習（SRS）のステップと間隔</strong>
+          <p>回答時の選択で復習間隔が変化します。どの段階であっても「✕ まだ」を押した時点で即座にレベル0へ戻り、今日中に再出題されます。</p>
+
+          <div class="srs-diagram-container">
+            <div class="srs-step-list">
+              <div class="srs-step-item">
+                <span style="font-weight: 700;">未習得 / ✕ まだ</span>
+                <span style="color: var(--danger); font-weight: 800;">当日再出題</span>
+              </div>
+              <div class="srs-step-arrow">↓ ◯ 覚えた</div>
+              <div class="srs-step-item">
+                <span><span class="srs-badge lvl-1">✓</span> 1ステップ目</span>
+                <span style="color: var(--primary); font-weight: 800;">1日後</span>
+              </div>
+              <div class="srs-step-arrow">↓ ◯ 覚えた</div>
+              <div class="srs-step-item">
+                <span><span class="srs-badge lvl-2">✓✓</span> 2ステップ目</span>
+                <span style="color: var(--primary); font-weight: 800;">3日後</span>
+              </div>
+              <div class="srs-step-arrow">↓ ◯ 覚えた</div>
+              <div class="srs-step-item">
+                <span><span class="srs-badge lvl-3">✓✓✓</span> 3ステップ目</span>
+                <span style="color: var(--primary); font-weight: 800;">7日後</span>
+              </div>
+              <div class="srs-step-arrow">↓ ◯ 覚えた</div>
+              <div class="srs-step-item is-grand-cru">
+                <span><span class="srs-badge lvl-4">👑 Grand Cru</span> 完成</span>
+                <span style="color: #8B6A37; font-weight: 800;">14日後</span>
+              </div>
+            </div>
+
+            <div class="srs-reset-alert">
+              ⚠️ どの段階からでも「✕ まだ」を押すと即時レベル0（未習得）へリセットされます。
+            </div>
+          </div>
         </section>
 
         <section class="help-section">
-          <strong>3. 各種設定の意味</strong>
-          <ul>
-            <li><strong>標準新規出題数</strong>：1日に出題される新しい問題の数。</li>
-            <li><strong>最低新規出題数</strong>：復習問題が大量に溜まった場合に、優先して確保される新しい問題の数（※）。</li>
-            <li><strong>合計最大出題数</strong>：1日に解く問題（復習＋新規）の合計上限。</li>
-          </ul>
-          <div style="margin-top: 10px; padding: 10px; background: rgba(255,255,255,0.05); border-radius: 6px; font-size: 13px; line-height: 1.5;">
-            <strong>※ 復習が大量に溜まった場合（合計最大出題数を超える日）の挙動</strong><br>
-            1. 復習が大量にあっても、まず「最低新規出題数」の枠だけは新しい問題用に優先確保されます。<br>
-            2. 残りの枠（合計最大 － 最低新規出題数）に、期日の古い順から復習問題がセットされます。<br>
-            3. 枠に入り切らなかった復習問題や残りの新問題は消えず、翌日以降に自動で繰り越されます。
+          <strong>3. 出題枠と優先ルール</strong>
+          <p>1日の出題数は設定した上限（合計最大出題数）の枠内で配分されます。</p>
+
+          <div class="srs-diagram-container">
+            <div class="srs-capacity-title">
+              📦 1日の合計最大出題数 (例: 100問)
+            </div>
+            <div class="srs-capacity-grid">
+              <div class="srs-capacity-card is-new">
+                <div class="srs-capacity-card-title">① 最低新規枠</div>
+                <div class="srs-capacity-card-desc">(例: 10問)<br>復習が溜まっていても優先確保される新問題</div>
+              </div>
+              <div class="srs-capacity-card is-review">
+                <div class="srs-capacity-card-title">② 復習枠</div>
+                <div class="srs-capacity-card-desc">(残りの枠: 90問)<br>期日が古い順（復習優先）で出題</div>
+              </div>
+            </div>
+            <p style="margin-top: 8px; text-align: center; font-size: 11px; color: var(--muted);">
+              ※ 枠からあふれた問題や未消化の出題は翌日以降に自動繰り越しされます。
+            </p>
           </div>
         </section>
       </div>
 
       <div class="srs-modal-actions">
         <button type="button" class="btn btn-action" onclick="closeHelpModal()">閉じる</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- AIソムリエ相談モーダル -->
+  <div id="modal-gemini" class="modal-backdrop hidden">
+    <div class="modal-card modal-gemini-card">
+      <h3 class="modal-title">🍷 AIソムリエの解説・相談</h3>
+      
+      <!-- 対象問題の文脈サマリー -->
+      <div id="gemini-q-summary" class="gemini-summary-box">
+        <span class="label">対象問題</span>
+        <p id="gemini-summary-text" class="gemini-summary-text"></p>
+      </div>
+
+      <!-- チャット・解説ログ領域 -->
+      <div id="gemini-chat-log" class="gemini-chat-log"></div>
+
+      <!-- 考え中ローディング表示 -->
+      <div id="gemini-loading" class="gemini-loading-box hidden">
+        <div class="gemini-loading-dots">
+          <span></span><span></span><span></span>
+        </div>
+        <p class="gemini-loading-text">AIソムリエが回答を作成中...</p>
+      </div>
+
+      <!-- 追加質問フォーム -->
+      <div class="gemini-input-group">
+        <input type="text" id="gemini-user-input" placeholder="追加で質問する（例: 語源は？ / 〇〇との違いは？）" onkeypress="handleGeminiInputKeypress(event)">
+        <button type="button" class="btn btn-action btn-gemini-send" onclick="sendGeminiFollowup()">送信</button>
+      </div>
+
+      <div class="srs-modal-actions" style="margin-top: 12px;">
+        <button type="button" class="btn btn-glass" onclick="closeGeminiModal()">閉じる</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- フィードバックモーダル -->
+  <div id="modal-feedback" class="modal-backdrop hidden">
+    <div class="modal-card">
+      <h3 class="modal-title" id="feedback-modal-title">不備報告・ご意見</h3>
+      <div id="feedback-target-info" class="gemini-summary-box hidden">
+        <p id="feedback-target-text" class="gemini-summary-text"></p>
+      </div>
+      <div style="margin-bottom: 12px;">
+        <textarea id="feedback-content" rows="4" style="width:100%; padding:10px; border:1px solid var(--line); border-radius:8px; font-size:13px; outline:none; resize:none;" placeholder="報告内容やご意見をご入力ください..."></textarea>
+      </div>
+      <div class="modal-actions">
+        <button type="button" class="btn btn-glass" onclick="closeFeedbackModal()">キャンセル</button>
+        <button type="button" class="btn btn-action" onclick="sendFeedback()">送信する</button>
       </div>
     </div>
   </div>

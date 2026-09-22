@@ -724,61 +724,104 @@ function shuffleArray(array) {
   return array;
 }
 
-// === 本日のAI学習キュー生成（設定値反映版） ===
+// === 本日のAI学習キュー生成（日次固定＆確実カウントダウン版） ===
 function getDailySrsQueue() {
   const today = getTodayString();
-  let dueList = [];
-  let newList = [];
-
-  const srsNew = parseInt(localStorage.getItem("sommelier_srs_new"), 10) || 20;
-  const srsMinNew = parseInt(localStorage.getItem("sommelier_srs_min_new"), 10) || 10;
-  const srsMaxTotal = parseInt(localStorage.getItem("sommelier_srs_max_total"), 10) || 100;
-
+  
+  // 全問題のマップを作成
+  const allQuestionsMap = {};
   Object.entries(rawData)
     .filter(([sheetName]) => !["白地図学習", "仕分け問題", "並び替え問題"].includes(sheetName))
     .forEach(([, arr]) => {
-      if (!Array.isArray(arr)) return;
-      arr.forEach(q => {
-        const u = userData[q.id];
-        if (!u || u.status === 'unseen') {
-          newList.push(q);
-        } else if (u.nextDueDate <= today) {
-          dueList.push(q);
-        }
-      });
+      if (Array.isArray(arr)) {
+        arr.forEach(q => { allQuestionsMap[q.id] = q; });
+      }
     });
 
-  const todayNewCount = Object.values(userData).filter(u => u.firstDate === today).length;
-  const maxNewSlots = Math.max(0, srsNew - todayNewCount);
-  const minNewSlots = Math.min(maxNewSlots, Math.max(0, srsMinNew - todayNewCount));
-
-  shuffleArray(newList);
-  
-  dueList.sort((a, b) => {
-    const dateA = userData[a.id]?.nextDueDate || today;
-    const dateB = userData[b.id]?.nextDueDate || today;
-    return dateA.localeCompare(dateB);
-  });
-
-  let selectedNew = [];
-  let selectedDue = [];
-
-  if (dueList.length + maxNewSlots <= srsMaxTotal) {
-    selectedNew = newList.slice(0, maxNewSlots);
-    selectedDue = dueList;
-  } else {
-    selectedNew = newList.slice(0, minNewSlots);
-    const remainingCapacity = Math.max(0, srsMaxTotal - selectedNew.length);
-    selectedDue = dueList.slice(0, remainingCapacity);
-    
-    const extraCapacity = srsMaxTotal - (selectedNew.length + selectedDue.length);
-    if (extraCapacity > 0 && newList.length > selectedNew.length) {
-      const extraNew = newList.slice(selectedNew.length, selectedNew.length + extraCapacity);
-      selectedNew.push(...extraNew);
-    }
+  // キャッシュされた本日の出題キューを取得
+  let savedQueue = null;
+  try {
+    savedQueue = JSON.parse(localStorage.getItem("sommelier_srs_daily_queue"));
+  } catch (e) {
+    savedQueue = null;
   }
 
-  return shuffleArray([...selectedDue, ...selectedNew]);
+  let dailyIds = [];
+
+  // 本日のキューが既に生成されていればそれを採用、日付が変わっていれば新規生成
+  if (savedQueue && savedQueue.date === today && Array.isArray(savedQueue.ids)) {
+    dailyIds = savedQueue.ids;
+  } else {
+    let dueList = [];
+    let newList = [];
+
+    const srsNew = parseInt(localStorage.getItem("sommelier_srs_new"), 10) || 20;
+    const srsMinNew = parseInt(localStorage.getItem("sommelier_srs_min_new"), 10) || 10;
+    const srsMaxTotal = parseInt(localStorage.getItem("sommelier_srs_max_total"), 10) || 100;
+
+    Object.values(allQuestionsMap).forEach(q => {
+      const u = userData[q.id];
+      if (!u || u.status === 'unseen') {
+        newList.push(q);
+      } else if (u.nextDueDate <= today) {
+        dueList.push(q);
+      }
+    });
+
+    const todayNewCount = Object.values(userData).filter(u => u.firstDate === today).length;
+    const maxNewSlots = Math.max(0, srsNew - todayNewCount);
+    const minNewSlots = Math.min(maxNewSlots, Math.max(0, srsMinNew - todayNewCount));
+
+    shuffleArray(newList);
+    
+    dueList.sort((a, b) => {
+      const dateA = userData[a.id]?.nextDueDate || today;
+      const dateB = userData[b.id]?.nextDueDate || today;
+      return dateA.localeCompare(dateB);
+    });
+
+    let selectedNew = [];
+    let selectedDue = [];
+
+    if (dueList.length + maxNewSlots <= srsMaxTotal) {
+      selectedNew = newList.slice(0, maxNewSlots);
+      selectedDue = dueList;
+    } else {
+      selectedNew = newList.slice(0, minNewSlots);
+      const remainingCapacity = Math.max(0, srsMaxTotal - selectedNew.length);
+      selectedDue = dueList.slice(0, remainingCapacity);
+      
+      const extraCapacity = srsMaxTotal - (selectedNew.length + selectedDue.length);
+      if (extraCapacity > 0 && newList.length > selectedNew.length) {
+        const extraNew = newList.slice(selectedNew.length, selectedNew.length + extraCapacity);
+        selectedNew.push(...extraNew);
+      }
+    }
+
+    const generatedQueue = shuffleArray([...selectedDue, ...selectedNew]);
+    dailyIds = generatedQueue.map(q => q.id);
+
+    // 本日の固定キューとしてストレージに保存
+    localStorage.setItem("sommelier_srs_daily_queue", JSON.stringify({
+      date: today,
+      ids: dailyIds
+    }));
+  }
+
+  // キュー内の問題のうち、今日まだ完了していないもの（覚えた＝nextDueDate > today となったものは除外）を抽出
+  const activeQueue = [];
+  dailyIds.forEach(id => {
+    const q = allQuestionsMap[id];
+    if (!q) return;
+    const u = userData[id];
+    
+    // まだ解いていない、または今日「まだ」と評価して再出題が必要（nextDueDate <= today）な問題を抽出
+    if (!u || u.status === 'unseen' || u.nextDueDate <= today) {
+      activeQueue.push(q);
+    }
+  });
+
+  return activeQueue;
 }
 
 // === メイン復習カードのUI更新 ===
@@ -846,6 +889,10 @@ function saveSrsSettings() {
   localStorage.setItem("sommelier_srs_new", elNew.value);
   localStorage.setItem("sommelier_srs_min_new", elMin.value);
   localStorage.setItem("sommelier_srs_max_total", elMax.value);
+
+  // 設定変更時は本日のキューキャッシュを破棄して再計算を可能にする
+  localStorage.removeItem("sommelier_srs_daily_queue");
+  updateHomeProgress();
 }
 
 // === ヘルプモーダルの制御 ===
@@ -857,4 +904,185 @@ function openHelpModal() {
 function closeHelpModal() {
   const el = document.getElementById("modal-help");
   if (el) el.classList.add("hidden");
+}
+
+// === AIソムリエ相談機能の制御 ===
+let currentGeminiHistory = [];
+let lastGeminiQuestionId = null;
+
+function openGeminiModal() {
+  const q = currentQuestions[currentIndex];
+  if (!q) return;
+
+  const summaryText = `Q. ${q.q} 【正解: ${q.a}】`;
+  const summaryEl = document.getElementById("gemini-summary-text");
+  if (summaryEl) summaryEl.innerText = summaryText;
+
+  const chatLog = document.getElementById("gemini-chat-log");
+
+  // 解いている問題が変わった場合は対話履歴とログをリセット
+  if (lastGeminiQuestionId !== q.id) {
+    if (chatLog) chatLog.innerHTML = "";
+    currentGeminiHistory = [];
+    lastGeminiQuestionId = q.id;
+  }
+
+  const modal = document.getElementById("modal-gemini");
+  if (modal) modal.classList.remove("hidden");
+
+  // 初回表示時（ログが空の場合）は自動で初期解説をリクエスト
+  if (chatLog && chatLog.children.length === 0) {
+    const initialPrompt = `ソムリエ・ワインエキスパート試験対策として、以下の問題について補足解説や背景知識、覚え方のポイントを詳しく教えてください。\n\n【問題】${q.q}\n【正解】${q.a}${q.note ? `\n【既存解説】${q.note}` : ""}`;
+    requestGeminiExplanation(initialPrompt, false);
+  }
+}
+
+function closeGeminiModal() {
+  const modal = document.getElementById("modal-gemini");
+  if (modal) modal.classList.add("hidden");
+}
+
+function handleGeminiInputKeypress(event) {
+  if (event.key === 'Enter') {
+    sendGeminiFollowup();
+  }
+}
+
+function sendGeminiFollowup() {
+  const input = document.getElementById("gemini-user-input");
+  if (!input) return;
+  const userText = input.value.trim();
+  if (!userText) return;
+
+  appendGeminiMessage('user', userText);
+  input.value = "";
+
+  requestGeminiExplanation(userText, true);
+}
+
+async function requestGeminiExplanation(promptText, isFollowup = false) {
+  const loadingEl = document.getElementById("gemini-loading");
+  if (loadingEl) loadingEl.classList.remove("hidden");
+
+  const q = currentQuestions[currentIndex];
+
+  const payload = {
+    action: "askGemini",
+    question: q ? q.q : "",
+    answer: q ? q.a : "",
+    note: q ? (q.note || "") : "",
+    prompt: promptText,
+    history: currentGeminiHistory
+  };
+
+  try {
+    const res = await fetch(GAS_API_URL, {
+      method: "POST",
+      headers: {
+        "Content-Type": "text/plain;charset=utf-8"
+      },
+      body: JSON.stringify(payload)
+    });
+
+    if (!res.ok) throw new Error(`HTTP Error: ${res.status}`);
+
+    const data = await res.json();
+    const replyText = data.reply || data.message || "回答を取得できませんでした。";
+
+    appendGeminiMessage('ai', replyText);
+
+    // 履歴を更新（フォローアップ質問時のみユーザー発言を履歴に追加）
+    if (isFollowup) {
+      currentGeminiHistory.push({ role: "user", text: promptText });
+    }
+    currentGeminiHistory.push({ role: "model", text: replyText });
+
+  } catch (err) {
+    console.error("Gemini API Error:", err);
+    appendGeminiMessage('ai', "申し訳ありません。AIソムリエとの通信でエラーが発生しました。時間をおいて再度お試しいただくか、GAS側のデプロイ状況をご確認ください。");
+  } finally {
+    if (loadingEl) loadingEl.classList.add("hidden");
+  }
+}
+
+function appendGeminiMessage(role, text) {
+  const chatLog = document.getElementById("gemini-chat-log");
+  if (!chatLog) return;
+
+  const msgDiv = document.createElement("div");
+  msgDiv.className = role === 'ai' ? "gemini-msg-ai" : "gemini-msg-user";
+  msgDiv.innerHTML = text.replace(/\n/g, "<br>");
+
+  chatLog.appendChild(msgDiv);
+  chatLog.scrollTop = chatLog.scrollHeight;
+}
+
+// === フィードバック（不備報告・ご意見）送信機能 ===
+let currentFeedbackType = 'general';
+
+function openFeedbackModal(type = 'general') {
+  currentFeedbackType = type;
+  const modal = document.getElementById("modal-feedback");
+  const targetInfo = document.getElementById("feedback-target-info");
+  const targetText = document.getElementById("feedback-target-text");
+  const input = document.getElementById("feedback-content");
+  
+  if (input) input.value = "";
+
+  if (type === 'quiz') {
+    const q = currentQuestions[currentIndex];
+    if (q) {
+      if (targetText) targetText.innerText = `対象問題: [${q.id}] ${q.q}`;
+      if (targetInfo) targetInfo.classList.remove("hidden");
+    } else {
+      if (targetInfo) targetInfo.classList.add("hidden");
+    }
+  } else {
+    if (targetInfo) targetInfo.classList.add("hidden");
+  }
+
+  if (modal) modal.classList.remove("hidden");
+}
+
+function closeFeedbackModal() {
+  const modal = document.getElementById("modal-feedback");
+  if (modal) modal.classList.add("hidden");
+}
+
+async function sendFeedback() {
+  const input = document.getElementById("feedback-content");
+  if (!input) return;
+  const content = input.value.trim();
+  if (!content) {
+    alert("内容を入力してください。");
+    return;
+  }
+
+  const q = currentQuestions[currentIndex];
+  const payload = {
+    action: "sendFeedback",
+    type: currentFeedbackType === 'quiz' ? "問題不備報告" : "一般意見・ご要望",
+    questionId: (currentFeedbackType === 'quiz' && q) ? q.id : "",
+    questionText: (currentFeedbackType === 'quiz' && q) ? q.q : "",
+    content: content
+  };
+
+  try {
+    const res = await fetch(GAS_API_URL, {
+      method: "POST",
+      headers: {
+        "Content-Type": "text/plain;charset=utf-8"
+      },
+      body: JSON.stringify(payload)
+    });
+
+    if (!res.ok) throw new Error(`HTTP Error: ${res.status}`);
+
+    const data = await res.json();
+    alert(data.message || "送信が完了しました。ご協力ありがとうございます！");
+    closeFeedbackModal();
+  } catch (err) {
+    console.error("Feedback Send Error:", err);
+    alert("送信に失敗しました。通信環境をご確認のうえ、再度お試しください。");
+  }
 }
