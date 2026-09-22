@@ -906,9 +906,9 @@ function closeHelpModal() {
   if (el) el.classList.add("hidden");
 }
 
-// === AIソムリエ相談機能の制御 ===
-let currentGeminiHistory = [];
 let lastGeminiQuestionId = null;
+let hasGeminiError = false;
+let currentGeminiHistory = [];
 
 function openGeminiModal() {
   const q = currentQuestions[currentIndex];
@@ -920,17 +920,18 @@ function openGeminiModal() {
 
   const chatLog = document.getElementById("gemini-chat-log");
 
-  // 解いている問題が変わった場合は対話履歴とログをリセット
-  if (lastGeminiQuestionId !== q.id) {
+  // 問題が切り替わった場合、または前回エラー状態のままだった場合はリセット
+  if (lastGeminiQuestionId !== q.id || hasGeminiError) {
     if (chatLog) chatLog.innerHTML = "";
     currentGeminiHistory = [];
     lastGeminiQuestionId = q.id;
+    hasGeminiError = false;
   }
 
   const modal = document.getElementById("modal-gemini");
   if (modal) modal.classList.remove("hidden");
 
-  // 初回表示時（ログが空の場合）は自動で初期解説をリクエスト
+  // チャットログが空（初回表示、またはエラー後にリセットされた状態）の場合のみ通信実行
   if (chatLog && chatLog.children.length === 0) {
     const initialPrompt = `ソムリエ・ワインエキスパート試験対策として、以下の問題について補足解説や背景知識、覚え方のポイントを詳しく教えてください。\n\n【問題】${q.q}\n【正解】${q.a}${q.note ? `\n【既存解説】${q.note}` : ""}`;
     requestGeminiExplanation(initialPrompt, false);
@@ -940,6 +941,14 @@ function openGeminiModal() {
 function closeGeminiModal() {
   const modal = document.getElementById("modal-gemini");
   if (modal) modal.classList.add("hidden");
+
+  // エラーが発生した状態でモーダルを閉じた場合、ログと履歴を空にして次回再リクエスト可能にする
+  if (hasGeminiError) {
+    const chatLog = document.getElementById("gemini-chat-log");
+    if (chatLog) chatLog.innerHTML = "";
+    currentGeminiHistory = [];
+    hasGeminiError = false;
+  }
 }
 
 function handleGeminiInputKeypress(event) {
@@ -966,16 +975,17 @@ async function requestGeminiExplanation(promptText, isFollowup = false) {
 
   const q = currentQuestions[currentIndex];
 
-  const payload = {
-    action: "askGemini",
-    question: q ? q.q : "",
-    answer: q ? q.a : "",
-    note: q ? (q.note || "") : "",
-    prompt: promptText,
-    history: currentGeminiHistory
-  };
+  // API通信だけを行う関数
+  async function sendRequest(history) {
+    const payload = {
+      action: "askGemini",
+      question: q ? q.q : "",
+      answer: q ? q.a : "",
+      note: q ? (q.note || "") : "",
+      prompt: promptText,
+      history: history
+    };
 
-  try {
     const res = await fetch(GAS_API_URL, {
       method: "POST",
       headers: {
@@ -984,22 +994,69 @@ async function requestGeminiExplanation(promptText, isFollowup = false) {
       body: JSON.stringify(payload)
     });
 
-    if (!res.ok) throw new Error(`HTTP Error: ${res.status}`);
+    if (!res.ok) {
+      throw new Error(`HTTP Error: ${res.status}`);
+    }
 
     const data = await res.json();
-    const replyText = data.reply || data.message || "回答を取得できませんでした。";
 
-    appendGeminiMessage('ai', replyText);
-
-    // 履歴を更新（フォローアップ質問時のみユーザー発言を履歴に追加）
-    if (isFollowup) {
-      currentGeminiHistory.push({ role: "user", text: promptText });
+    if (!data.success) {
+      throw new Error(data.error || "API処理でエラーが発生しました。");
     }
-    currentGeminiHistory.push({ role: "model", text: replyText });
+
+    const replyText = data.reply || data.message;
+
+    if (!replyText) {
+      throw new Error("回答が空でした。");
+    }
+
+    return replyText;
+  }
+
+  try {
+    let replyText;
+
+    try {
+      // まず普通に今までの履歴で送信
+      replyText = await sendRequest(currentGeminiHistory);
+
+    } catch (firstError) {
+      console.warn("Geminiエラー。履歴をリセットして再送します。", firstError);
+
+      // ★ 一度失敗したら履歴だけリセット
+      currentGeminiHistory = [];
+
+      // ★ その場で自動的に再送
+      replyText = await sendRequest([]);
+    }
+
+    // 成功した場合だけ表示
+    appendGeminiMessage("ai", replyText);
+
+    // 成功した会話だけ履歴として残す
+    currentGeminiHistory.push({
+      role: "user",
+      text: promptText
+    });
+
+    currentGeminiHistory.push({
+      role: "model",
+      text: replyText
+    });
+
+    hasGeminiError = false;
 
   } catch (err) {
     console.error("Gemini API Error:", err);
-    appendGeminiMessage('ai', "申し訳ありません。AIソムリエとの通信でエラーが発生しました。時間をおいて再度お試しいただくか、GAS側のデプロイ状況をご確認ください。");
+
+    currentGeminiHistory = [];
+    hasGeminiError = true;
+
+    appendGeminiMessage(
+      "ai",
+      "⚠️ " + err.message
+    );
+
   } finally {
     if (loadingEl) loadingEl.classList.add("hidden");
   }
